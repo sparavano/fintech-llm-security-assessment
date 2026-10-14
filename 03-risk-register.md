@@ -1,6 +1,6 @@
 # 03 · Risk register
 
-> **Draft.** Scoring method defined. Scores pending.
+> **Draft.** Scoring method defined. T01 scored; T02 to T12 pending.
 
 ## Scoring method
 
@@ -32,7 +32,7 @@
 
 | ID | Threat (short) | L | I | Inherent | Treatment | Controls | L | I | Residual |
 |---|---|---|---|---|---|---|---|---|---|
-| T01 | Injection via transfer description | | | | | | | | |
+| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14 | | | |
 | T02 | Unrequested card freeze | | | | | | | | |
 | T03 | Hidden context extraction | | | | | | | | |
 | T04 | Out-of-policy commitments | | | | | | | | |
@@ -46,3 +46,10 @@
 | T12 | Misinformation taken as the Bank's word | | | | | | | | |
 
 Scores are qualitative judgments about a fictional system. Their value lies in the reasoning recorded for each one.
+
+## Rationale
+
+### T01
+
+- **Likelihood 4 (Likely).** Anyone who can send a transfer can attempt it, the techniques are public and nothing in the design separates third-party text from instructions. It is not a 5 because success depends on how the model behaves and on the victim asking about their transactions within 30 days.
+- **Impact 4 (Major).** Social engineering in the Bank's own voice, card lockouts and manipulated handoffs, repeatable across many customers. It is not a 5 because the assistant cannot move money by itself, so losses require the victim to act on the message.

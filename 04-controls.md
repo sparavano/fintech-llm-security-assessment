@@ -6,7 +6,7 @@
 
 | ID | Control | Mitigates |
 |---|---|---|
-| K01 | Treat tool results and retrieved passages as data: mark them as untrusted in the prompt, and neutralize instructions inside transfer descriptions before they reach the model | T01, T08 |
+| K01 | Keep third-party text out of the prompt where possible, for example by showing transfer descriptions in the app instead of passing them to the model; where such text must be included, mark it as untrusted data and neutralize instructions in it | T01, T08 |
 | K02 | Confirm state-changing actions outside the model, with a native in-app confirmation instead of a chat reply | T02 |
 | K03 | Enforce least privilege at the API layer: delegated per-customer tokens for tool calls, with ownership checked by the core APIs | T05 |
 | K04 | Keep nothing in the system prompt that would cause harm if disclosed, and move escalation criteria into code | T03 |
@@ -19,12 +19,13 @@
 | K11 | Ground answers on fees and rights in retrieved passages with citations, and refuse or escalate when no passage supports the answer | T04, T12 |
 | K12 | Test before release and on every provider change with an adversarial suite, and monitor tool-call patterns in production | T01, T02, T10 |
 | K13 | Tell customers they are talking to an AI and keep a clear path to a human | T12 |
+| K14 | Mark handoff summaries as model-generated, and require agents to confirm any request directly with the customer before acting on it | T01, T06 |
 
 ## Framework mapping
 
 | ID | NIST AI RMF 1.0 | NIST AI 600-1 | ISO/IEC 42001 Annex A | BCRA AI guide section |
 |---|---|---|---|---|
-| K01–K13 | pending | pending | pending | pending |
+| K01–K14 | pending | pending | pending | pending |
 
 ISO/IEC 42001 references will be given by control number only, checked against the licensed text of the standard.
 
