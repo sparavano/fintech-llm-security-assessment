@@ -1,6 +1,6 @@
 # 03 · Risk register
 
-> **Draft.** Scoring method defined. T01 and T02 scored; T03 to T12 pending.
+> **Draft.** Scoring method defined. T01, T02 and T07 scored; the rest pending.
 
 ## Scoring method
 
@@ -38,7 +38,7 @@
 | T04 | Out-of-policy commitments | | | | | | | | |
 | T05 | Cross-customer scoping failure | | | | | | | | |
 | T06 | Transcript and handoff over-retention | | | | | | | | |
-| T07 | Cross-border processing by provider | | | | | | | | |
+| T07 | Cross-border processing by provider | 3 | 5 | 15 High | Mitigate | K09, K13, K16, K17 | | | |
 | T08 | Poisoned help center content | | | | | | | | |
 | T09 | Malicious links in rendered replies | | | | | | | | |
 | T10 | Unannounced provider changes | | | | | | | | |
@@ -60,3 +60,10 @@ Scored on the worst reasonable scenario, the attacker-driven path through T01. T
 
 - **Likelihood 4 (Likely).** Any sender can attempt it through T01, and nothing in the design stands between the model's decision and the freeze: the confirmation rule exists only in the system prompt. It is slightly less likely than T01 because the model must act, not just reply, but that does not change the level. It is not a 5 because the attacker-driven path still depends on the model following the injected text.
 - **Impact 4 (Major).** An action on the account without the customer's consent, repeatable at scale, and the piece that makes the T01 fraud believable. It is not a 5 because the freeze is reversible by the customer in the app and cannot move funds. It is not a 3 because the impact scale places actions taken on accounts without consent at level 4, and a mass event disrupts service for many customers at once.
+
+### T07
+
+Scored on the worst reasonable scenario, a provider-side incident that exposes the retained conversations. The likelihood scale is read as frequency here, since no attacker is involved.
+
+- **Likelihood 3 (Possible).** An exposure event needs something to happen on the provider's side: an incident, a legal demand or use of the data beyond the contract. Routine review of flagged conversations by the provider's staff is more likely than that, and the compliance gap exists from day one, but a probability score is the wrong tool for a non-compliance that is present by design. The gap is recorded as finding F01 in [06-findings.md](06-findings.md).
+- **Impact 5 (Severe).** Every assistant conversation of the retention window, with account movements, for every customer who used it, exposed at once; sanctions from the AAIP and the BCRA would follow. The scale defines level 5 as large-scale exposure with likely regulatory action, and this is that case.

@@ -1,6 +1,6 @@
 # 06 · Findings
 
-> **Draft.** Findings in v0.1 come from design review only. Test evidence is added in v0.2.
+> **Draft.** Findings in v0.1 come from design review only. Test evidence is added in v0.2. F01 recorded; more follow as the threat analysis advances.
 
 ## Format
 
@@ -16,4 +16,6 @@
 
 ## Findings
 
-Pending.
+| ID | Title | Severity | Related threats | Evidence | Recommendation | Status |
+|---|---|---|---|---|---|---|
+| F01 | Customer data under financial secrecy is sent to a provider abroad without a verified legal and contractual basis | High | T07 | Design review: [01-system.md](01-system.md) section 8 records the provider's terms as unverified; see T07 in [02-threat-model.md](02-threat-model.md) | K09, K16, K13: establish the transfer basis under Ley 25.326 art. 12, bring the contract up to BCRA Section 10.3, notify the SEFYC if the service is critical, minimize the data sent and tell customers | Open |

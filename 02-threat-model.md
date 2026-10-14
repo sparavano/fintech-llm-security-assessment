@@ -1,6 +1,6 @@
 # 02 · Threat model
 
-> **Draft.** The catalogue comes from the design review of [01-system.md](01-system.md). T01 and T02 are analyzed; T03 to T12 are pending.
+> **Draft.** The catalogue comes from the design review of [01-system.md](01-system.md). T01, T02 and T07 are analyzed; the rest are pending.
 
 ## Method
 
@@ -170,4 +170,73 @@ The fix is to take the decision out of the model. The model may propose a freeze
 
 Proposed rating: likelihood 4, impact 4, inherent risk 16 (High). See [03-risk-register.md](03-risk-register.md).
 
-T03 to T12: pending.
+### T07 · Data under financial secrecy is processed by a provider abroad under unverified terms
+
+Nothing is attacked in this threat. With every request (F5) the Bank sends a third party outside Argentina the customer's identity (D1), thirty days of account movements with counterparties and free-text descriptions (D2), card references (D3), everything the customer typed (D4) and its own internal instructions (D6). The exposure is structural: it exists as long as the arrangement does, and it depends on what the provider does with the data and on which law reaches it.
+
+The legal reading below is the author's, for the purposes of this case study. It is not legal advice (see the README).
+
+**What the arrangement looks like**
+
+[01-system.md](01-system.md) records three facts and one assumption: the model runs in the provider's cloud region outside Argentina (C4); the Bank adds no filtering or minimization of its own before sending (decisions 1 and 6); the Bank has not verified the provider's terms, and only assumes the provider does not train on API data (section 8). This analysis takes the most common case, a provider headquartered in the United States and processing in a United States region, and notes where a different region would change the answer.
+
+Typical API terms of large providers, to be checked against the actual contract: inputs and outputs retained for a limited period, often around thirty days, for abuse monitoring; flagged content reviewed by the provider's staff; no training on API data by default; subprocessors; zero-retention options for some customers on request.
+
+**Scenario**
+
+Four paths lead to exposure, and a fifth to dependency.
+
+*Routine review.* A conversation is flagged by the provider's abuse monitoring, which is plausible when customers discuss fraud, blocked cards or disputed charges, and an employee of the provider, outside Argentina and outside the Bank's control, reads a customer's name, movements and messages.
+
+*Legal process abroad.* Under the United States CLOUD Act, United States authorities can compel a provider established there to produce data in its possession wherever it is stored. The Bank may learn of it afterwards or not at all.
+
+*Provider incident.* A bug or breach on the provider's side exposes retained prompts: every assistant conversation of the retention window, with account movements, for every customer who used the assistant in that period.
+
+*Use beyond the purpose.* If training on API data is not excluded in writing, customer data can end up in a model and, through memorization, in answers to other users.
+
+*Dependency.* The provider changes its model, terms, prices or availability (see T10). Without a tested exit, the Bank either accepts the change or loses the assistant.
+
+**Preconditions**
+
+- Data crosses TB2 unminimized: names, identifiers and free text go to the provider although the model does not need them to explain a transaction.
+- The provider's region is in a country the AAIP does not list as providing adequate protection. The list covers the EU and EEA, the United Kingdom, Switzerland, Guernsey, Jersey, the Isle of Man, the Faroe Islands, Canada (private sector), Andorra, New Zealand, Uruguay and Israel (automated data). The United States is not on it.
+- The contract has not been reviewed for retention, human review, training, subprocessors, audit rights, law-enforcement requests, breach notification and exit assistance.
+- The compliance steps described under *Impact* have not been taken, which is the state [01-system.md](01-system.md) describes.
+
+**Assets affected**
+
+D1, D2, D3, D4 and D6 on every request; D7 is generated at the provider. The Bank's duty of financial secrecy and its obligations as data controller. The assistant's availability, in the dependency path.
+
+**Impact**
+
+- *Financial secrecy.* Ley 21.526, art. 39, bars the Bank from revealing the passive operations it carries out; movements on a savings or checking account are passive operations, and the article's closing paragraph binds the Bank's staff to absolute reserve. Outsourcing is not prohibited: the BCRA's minimum requirements on technology and information security risk allow outsourcing in the country or abroad, under conditions. The duty is stretched where the provider's staff can read the data and where a foreign authority can compel it, so the contract must bind the provider and its people to the same reserve, and the data sent must be the minimum.
+- *Personal data.* Ley 25.326, art. 12, prohibits transfers to countries without adequate protection unless an exception applies. The exception for banking transfers concerns the data needed to carry out the transactions themselves; in the author's reading it is not a basis for sending customer conversations to a service provider. The available bases are the data subject's express consent or contractual clauses: the model clauses of Disposición DNPDP 60-E/2016 (Annex II, service provision), which require purpose limitation, confidentiality, security, no subprocessing without written consent, audit access, notice of law-enforcement requests and return or destruction of the data, or the model clauses adopted by Resolución AAIP 198/2023. A contract that departs from the models must be submitted to the AAIP within thirty calendar days of signing. Arts. 4, 6, 9, 10 and 25 of the law also apply: data must be pertinent and not excessive, customers must be told the purpose and the recipients, the processor must apply security measures, keep confidentiality and use the data only for the contracted service.
+- *BCRA requirements.* Section 10 of the minimum requirements (texto ordenado al 13/02/2026, Comunicación "A" 8401) governs relationships with third parties: prior notice to the SEFYC at least sixty calendar days before outsourcing critical services, with locations and subcontractors; a change of location or subcontractor counts as a new outsourcing; contracts with minimum terms including audit rights, service levels and data deletion; monitoring, internal audits and exit plans that cover the retrieval of data; the entity bears the cost of SEFYC inspections abroad, and a foreign provider must be constituted in a country with AML/CFT standards. Section 4.6 requires AI software used by third parties to be documented and risk-assessed. The BCRA AI guide adds, under outsourcing, pre-contract risk assessment, sufficient information about the models, assessment of criticality and concentration, portability and exit strategies, and continuous monitoring, with the entity keeping responsibility; under transparency, customers must be told when they interact with AI.
+- *Sanctions and liability.* The AAIP can sanction under Ley 25.326, art. 31, and the BCRA under Ley 21.526, art. 41, from a warning to fines and disqualifications. A breach of financial secrecy exposes the Bank to civil claims by the customers affected.
+- *Customers.* Exposed account movements enable targeted fraud and extortion and reveal patterns of life; the harm does not depend on whether the Bank was at fault.
+- *Reputational.* "Bank sent customers' movements to a foreign AI company" is a story that needs no breach to run.
+
+**Detection**
+
+Weak. The Bank cannot observe what happens inside the provider. It relies on the contract, on the provider's certifications (which attest to the provider's controls, not to compliance with Argentine law), on breach notifications and on audit rights that large providers rarely grant beyond reports.
+
+**Classification**
+
+- OWASP LLM 2026: LLM02 Sensitive Information Disclosure, because customer data leaves the Bank's control and can resurface through retention, review or training; LLM04 Supply Chain, because the assistant depends on a third-party model and its terms.
+- MITRE ATLAS: no matching technique. This is a supplier and compliance exposure, not an adversary technique.
+
+**Treatment direction** (see [04-controls.md](04-controls.md))
+
+Two things shrink the exposure at its source. First, send less (K16): the model needs amounts, dates and counterparties to explain a transaction, not the customer's name or identifier, and not the free text that T01 shows to be dangerous anyway. Second, put the arrangement in order before it runs (K09): a transfer basis under art. 12, a contract that meets Section 10.3 and mirrors the art. 39 duty of reserve, zero or shortest retention, no human review or review only under confidentiality by named staff, no training, subprocessor consent, notice of law-enforcement requests, breach notification, audit rights and exit assistance; the SEFYC notice if the service is critical; documentation under 4.6. A region in an adequate territory, such as the EU, would settle the art. 12 question but not foreign legal process, which follows the provider's home jurisdiction. An exit strategy with a tested alternative (K17) addresses the dependency path, and telling customers what happens to their conversation (K13) addresses art. 6 and the BCRA's transparency expectation. Hosting an open-weight model in the country would remove TB2 altogether; it trades the exposure for capability, cost and operational burden, and deserves its own evaluation.
+
+**Open questions**
+
+- Which country hosts the processing region, and does the provider offer one in a territory the AAIP lists as adequate?
+- What do the contract and the provider's policies say about retention, human review, training, subprocessors, law-enforcement requests, breach notification, audit rights and exit assistance?
+- Which transfer basis is in place, and if a non-model contract was used, was it submitted to the AAIP in time?
+- Is the assistant a critical service under the Bank's own criteria, and was the SEFYC notified sixty days in advance?
+- Does the privacy notice tell customers that a third-party provider abroad processes their conversations?
+
+Proposed rating: likelihood 3, impact 5, inherent risk 15 (High). The compliance gap is recorded separately as finding F01 in [06-findings.md](06-findings.md). See [03-risk-register.md](03-risk-register.md).
+
+T03 to T06 and T08 to T12: pending.
