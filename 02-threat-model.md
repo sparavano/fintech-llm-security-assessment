@@ -1,6 +1,6 @@
 # 02 · Threat model
 
-> **v0.1.** The catalogue comes from the design review of [01-system.md](01-system.md). All twelve threats are analyzed. T01, T02 and T07 are written up in full as reference cases; the rest are condensed. MITRE ATLAS references follow ATLAS 2026.07 and should be re-checked on atlas.mitre.org before publication.
+> **v0.1.** The catalogue comes from the design review of [01-system.md](01-system.md). All twelve threats are analyzed. T01, T02 and T07 are written up in full as reference cases; the rest are condensed. MITRE ATLAS references follow ATLAS 2026.07 as listed by MITRE's D3FEND; AML.T0034 and case study AML.CS0021 were checked against a third-party mirror only.
 
 ## Method
 

@@ -44,7 +44,7 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
 - [ ] v0.2: test cases and evidence against a locally hosted open model, per [05-test-plan.md](05-test-plan.md)
 - [ ] v0.3: residual risk and final recommendations
 
-Before v0.2 is published, three verifications are pending: the OWASP LLM Top 10 2026 category names against the official document, the MITRE ATLAS technique identifiers against atlas.mitre.org, and the ISO control numbers against the licensed text of both standards.
+Verification status of the references: the OWASP LLM Top 10 2026 category names were checked against six independent summaries of the official document, which agree, but not against the official PDF itself; the MITRE ATLAS technique identifiers were checked against MITRE's D3FEND listing of ATLAS 2026.07, except AML.T0034 and case study AML.CS0021, which were checked against a third-party mirror only; the ISO/IEC 42001 Annex A numbering was cross-checked against public control listings, and the ISO/IEC 27001:2022 numbering is widely published, but neither has been checked against the licensed text. Those three checks remain open before v0.2.
 
 ## Ground rules
 
