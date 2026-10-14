@@ -2,18 +2,18 @@
 
 Security and risk assessment of a **fictional** generative AI assistant run by a **fictional** Argentine digital bank. The case walks through the full cycle an AI risk or security team would follow for an LLM-based system: characterize it, model its threats, rate the risks, map them to controls under the frameworks a regulated financial entity in Argentina would be expected to consider, and record findings.
 
-> **Status:** v0.1 complete. Design review only: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. No testing yet; see [Roadmap](#roadmap).
+> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. No testing yet; see [Roadmap](#roadmap).
 
 ## Results in brief
 
-| | |
+| Item | Summary |
 |---|---|
 | System | A customer-facing assistant that answers product questions, explains the customer's last 30 days of transactions and can freeze a debit card, built on a third-party hosted model ([01-system.md](01-system.md)) |
 | Threats | 12, covering the ten categories of the OWASP Top 10 for LLM Applications 2026 ([02-threat-model.md](02-threat-model.md)) |
 | Highest risks | T01, instructions hidden in a transfer description, and T02, a card frozen on the model's judgment alone (16 each); T07, financial-secrecy data processed by a provider abroad under unverified terms (15) ([03-risk-register.md](03-risk-register.md)) |
 | Controls | 17, mapped to NIST AI RMF 1.0, NIST AI 600-1, ISO/IEC 42001, ISO/IEC 27001 and the BCRA AI guide ([04-controls.md](04-controls.md)) |
 | Findings | 12 from design review, 9 High and 3 Medium, with a suggested order of work ([06-findings.md](06-findings.md)) |
-| Main conclusion | Four design changes remove most of the risk without making the assistant less useful: send less to the model, take decisions out of the model, treat output as untrusted, and put the provider arrangement in order |
+| Main conclusion | Four design changes remove most of the risk at little cost to usefulness: send less to the model, take decisions out of the model, treat output as untrusted, and put the provider arrangement in order |
 
 ## Why this case
 
@@ -44,7 +44,7 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
 - [ ] v0.2: test cases and evidence against a locally hosted open model, per [05-test-plan.md](05-test-plan.md)
 - [ ] v0.3: residual risk and final recommendations
 
-Verification status of the references: the OWASP LLM Top 10 2026 category names were checked against six independent summaries of the official document, which agree, but not against the official PDF itself; the MITRE ATLAS technique identifiers were checked against MITRE's D3FEND listing of ATLAS 2026.07, except AML.T0034 and case study AML.CS0021, which were checked against a third-party mirror only; the ISO/IEC 42001 Annex A numbering was cross-checked against public control listings, and the ISO/IEC 27001:2022 numbering is widely published, but neither has been checked against the licensed text. Those three checks remain open before v0.2.
+How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
 
 ## Ground rules
 
@@ -69,10 +69,11 @@ Argentine regulation
 
 - BCRA, *Guía de supervisión sobre el uso responsable y seguro de inteligencia artificial (IA)*, versión inicial junio de 2026. <https://www.bcra.gob.ar/guias-de-supervision-bcra/>
 - BCRA, *Requisitos mínimos para la gestión y control de los riesgos de la tecnología y seguridad de la información*, texto ordenado al 13/02/2026 (Comunicación "A" 8401). <https://www.bcra.gob.ar/archivos/Pdfs/Texord/t-rmgcti.pdf>
+- BCRA, *Guía de supervisión de prevención de pérdida de información (DLP)*, versión inicial junio de 2020. <https://www.bcra.gob.ar/guias-de-supervision-bcra/>
 - Ley 21.526 de Entidades Financieras, art. 39 (secreto financiero) and art. 41 (sanciones).
 - Ley 25.326 de Protección de los Datos Personales, in particular arts. 4, 6, 9, 10, 12, 25 and 31; Decreto 1558/2001.
 - AAIP, international transfers: Disposición DNPDP 60-E/2016 (model clauses and adequacy list) and Resolución AAIP 198/2023 (RIPD model clauses). <https://www.argentina.gob.ar/transferencias-internacionales>
-- Ley 24.240 de Defensa del Consumidor, arts. 4, 8 and 53.
+- Ley 24.240 de Defensa del Consumidor, arts. 4, 8, 37 and 53.
 
 Cases
 

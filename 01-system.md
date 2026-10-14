@@ -8,7 +8,7 @@ Acme Digital Bank (the Bank) is a fictional Argentine digital bank, authorized a
 
 ## 2. System under assessment
 
-**Acme Assistant** is a generative AI chat assistant embedded in the mobile app. It is available 24/7, in Spanish, to customers who are already logged in.
+**Acme Assistant** is a generative AI chat assistant embedded in the mobile app and in production. It is available 24/7, in Spanish, to customers who are already logged in.
 
 | Capability | Type | Description |
 |---|---|---|
@@ -84,9 +84,9 @@ flowchart LR
 | F1–F2 | The customer's message reaches the orchestrator with the customer ID taken from the authenticated session, never from the message itself. |
 | F3 | For product questions the orchestrator retrieves the most relevant passages from the index. |
 | F4 | Every night the index is rebuilt from the CMS. Any published article is indexed automatically. |
-| F5–F6 | The orchestrator sends the full prompt to the LLM service, which returns either a reply or a tool call. |
+| F5–F6 | The orchestrator sends the full prompt to the LLM service, which returns either a reply, already screened by the provider's content filter, or a tool call. |
 | F7–F8 | The orchestrator overwrites any customer ID in the tool call with the one from the session, checks that the card belongs to that customer and executes the call through the tool gateway. The result is added to the prompt and the model is called again. |
-| F9 | The reply goes through the provider's output filter and is rendered in the app as Markdown. |
+| F9 | The reply is rendered in the app as Markdown, links included. |
 | F10–F11 | The whole conversation, tool results included, is stored. On handoff the model writes a summary for the agent. |
 
 ### Design decisions relevant to the assessment
@@ -109,7 +109,7 @@ flowchart LR
 | D4 | Conversation content, including anything the customer volunteers | C3, C4, C8, C9 | Personal data, possibly sensitive |
 | D5 | Help center articles and product terms | C4, C5, C10 | Public |
 | D6 | System prompt, tool definitions, escalation criteria | C3, C4 | Internal |
-| D7 | Handoff summaries | C9 | Personal data |
+| D7 | Handoff summaries | C3, C4, C9 | Personal data |
 
 ## 6. Trust boundaries
 
@@ -135,6 +135,7 @@ This section frames the assessment. It is not a legal opinion.
 
 ## 8. Assumptions
 
-- The provider has committed by contract not to use API data to train its models. This is to be verified in the outsourcing review.
+- The provider has committed by contract not to use API data to train its models. This is to be verified in the outsourcing review. The Bank has not yet put in place a transfer basis under Ley 25.326, a notice to the SEFYC or a customer notice about the provider; the assessment assumes none exists.
+- The free-text description of a transfer holds up to 100 characters.
 - App authentication, session management and the core banking APIs are secure. They are out of scope except where they meet the assistant.
 - The model is a general-purpose model used through the provider's API, without fine-tuning.

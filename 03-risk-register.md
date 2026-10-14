@@ -4,27 +4,27 @@
 
 ## Scoring method
 
-**Likelihood (1–5)** reflects how easily the threat can be realized against the system as designed in [01-system.md](01-system.md): the capability the attacker needs, how exposed the entry point is and which controls already exist.
+**Likelihood (1–5)** reflects how easily the threat can be realized against the system as designed in [01-system.md](01-system.md): the capability the attacker needs, how exposed the entry point is and which controls already exist. For threats without an attacker, it reflects how often the event is expected over a one-year horizon.
 
 | Score | Label | Guide |
 |---|---|---|
-| 1 | Rare | Needs insider access and specialist skill, and existing controls would likely stop it. |
-| 2 | Unlikely | Needs specialist skill or a rare combination of conditions. |
-| 3 | Possible | Feasible for a motivated attacker with public techniques. |
-| 4 | Likely | Feasible for any customer or sender with moderate effort. |
-| 5 | Almost certain | Trivial to attempt at scale, or will happen without any attacker. |
+| 1 | Rare | Needs insider access and specialist skill, and existing controls would likely stop it. Without an attacker: not expected within the horizon. |
+| 2 | Unlikely | Needs specialist skill or a rare combination of conditions. Without an attacker: could occur, but is not expected. |
+| 3 | Possible | Feasible for a motivated attacker with public techniques. Without an attacker: may well occur within the horizon. |
+| 4 | Likely | Feasible for any customer or sender with moderate effort. Without an attacker: expected to occur within the horizon. |
+| 5 | Almost certain | Trivial to attempt at scale and reliably successful. Without an attacker: occurs routinely. |
 
 **Impact (1–5)** is the highest score across four dimensions: harm to customers, financial loss, regulatory or legal exposure, and reputation.
 
 | Score | Label | Guide |
 |---|---|---|
-| 1 | Minimal | Inconvenience to one customer, no data exposed. |
-| 2 | Minor | Limited harm to few customers, quickly reversible. |
-| 3 | Moderate | Personal data of a customer exposed, or service disrupted for many. |
-| 4 | Major | Personal data under financial secrecy exposed for many customers, or actions taken on accounts without consent. |
-| 5 | Severe | Large-scale exposure or harm, likely regulatory action. |
+| 1 | Minimal | Inconvenience to one customer; no data exposed; no financial, legal or reputational effect. |
+| 2 | Minor | Limited harm to few customers, quickly reversible; costs the Bank absorbs; no regulatory interest. |
+| 3 | Moderate | Personal data of a customer exposed, or service disrupted for many; disputes and losses limited to individual cases; a regulatory finding without sanction; contained reputational damage. |
+| 4 | Major | Personal data under financial secrecy exposed for many customers, or actions taken on accounts without consent; sanctions likely; sustained reputational damage. |
+| 5 | Severe | Large-scale exposure or harm; regulatory action likely; lasting reputational damage. |
 
-**Rating** = Likelihood × Impact: 1–4 Low, 5–9 Medium, 10–16 High, 20–25 Critical.
+**Rating** = Likelihood × Impact: 1–4 Low, 5–9 Medium, 10–16 High, above 16 Critical.
 
 *Inherent* risk is scored on the system as designed. *Residual* risk is scored after the controls proposed in [04-controls.md](04-controls.md).
 
@@ -32,12 +32,12 @@
 
 | ID | Threat (short) | L | I | Inherent | Treatment | Controls | L | I | Residual |
 |---|---|---|---|---|---|---|---|---|---|
-| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14 | | | |
+| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14, K16 | | | |
 | T02 | Unrequested card freeze | 4 | 4 | 16 High | Mitigate | K01, K02, K07, K12, K15 | | | |
 | T03 | Hidden context extraction | 4 | 2 | 8 Medium | Mitigate | K04, K06, K12 | | | |
-| T04 | Out-of-policy commitments | 4 | 3 | 12 High | Mitigate | K06, K11, K12, K13 | | | |
+| T04 | Out-of-policy commitments | 4 | 3 | 12 High | Mitigate | K06, K11, K12 | | | |
 | T05 | Cross-customer scoping failure | 2 | 4 | 8 Medium | Mitigate | K03, K12 | | | |
-| T06 | Transcript and handoff over-retention | 3 | 4 | 12 High | Mitigate | K08, K14, K16 | | | |
+| T06 | Transcript and handoff over-retention | 3 | 4 | 12 High | Mitigate | K08, K14 | | | |
 | T07 | Cross-border processing by provider | 3 | 5 | 15 High | Mitigate | K09, K13, K16, K17 | | | |
 | T08 | Poisoned help center content | 2 | 4 | 8 Medium | Mitigate | K01, K05, K06, K10 | | | |
 | T09 | Malicious links in rendered replies | 3 | 4 | 12 High | Mitigate | K05 | | | |
@@ -64,7 +64,7 @@ Scores are qualitative judgments about a fictional system. Their value lies in t
 | 10 | T05 | Cross-customer scoping failure | 8 Medium | Needs a flaw in one check; severe if found |
 | 10 | T08 | Poisoned help center content | 8 Medium | Needs CMS access; wide reach once in |
 
-Three observations fall out of the ranking. The top two share a root cause, untrusted text reaching a model that can act, and share their main control (K02 plus K01). T07 is the only High that is not an attack: it is a compliance and supplier exposure that exists from day one. The six threats tied at 12 are all cheap to reduce: K05 (plain-text rendering) alone removes most of T09, K07 removes most of T11, and K11 with K12 addresses T04, T10 and T12 together.
+The ranking says a few things on its own. The top two share a root cause, untrusted text reaching a model that can act, and share their main control (K02 plus K01). Three Highs need no attacker, T07, T10 and T12, and T07 is the only one that is a compliance exposure present from day one. Of the six threats tied at 12, five are cheap to reduce: K05 (plain-text rendering) alone removes most of T09, K07 most of T11, K11 with K12 addresses T04 and T12, and K12 with version pinning and change notice (K09) addresses T10. T06 is the exception: retention and access need process changes, not a switch.
 
 ## Rationale
 
@@ -82,10 +82,10 @@ Scored on the worst reasonable scenario, the attacker-driven path through T01. T
 
 ### T07
 
-Scored on the worst reasonable scenario, a provider-side incident that exposes the retained conversations. The likelihood scale is read as frequency here, since no attacker is involved.
+Scored on the worst reasonable scenario, a provider-side incident that exposes the retained conversations. Likelihood is read on the no-attacker side of the scale.
 
 - **Likelihood 3 (Possible).** An exposure event needs something to happen on the provider's side: an incident, a legal demand or use of the data beyond the contract. Routine review of flagged conversations by the provider's staff is more likely than that, and the compliance gap exists from day one, but a probability score is the wrong tool for a non-compliance that is present by design. The gap is recorded as finding F01 in [06-findings.md](06-findings.md).
-- **Impact 5 (Severe).** Every assistant conversation of the retention window, with account movements, for every customer who used it, exposed at once; sanctions from the AAIP and the BCRA would follow. The scale defines level 5 as large-scale exposure with likely regulatory action, and this is that case.
+- **Impact 5 (Severe).** Every assistant conversation of the retention window, with account movements, for every customer who used it, exposed at once; sanctions from the AAIP and the BCRA would be likely. The scale defines level 5 as large-scale exposure with likely regulatory action, and this is that case.
 
 ### T03
 
@@ -114,7 +114,7 @@ Scored on the worst reasonable scenario, a provider-side incident that exposes t
 
 ### T09
 
-- **Likelihood 3 (Possible).** It needs a path into the prompt (T01, T08) or a cooperative model (T04); given T01's rating, the path exists.
+- **Likelihood 3 (Possible).** It needs a path into the prompt (T01, T08) or a cooperative model (T04); given T01's rating, the path exists. It is rated below T01 because the injection must both succeed and aim at the reply format, a narrower outcome.
 - **Impact 4 (Major).** Phishing inside the Bank's own app, or exfiltration of thirty days of movements with no click. Scored separately from T01 because K05 closes it independently of whether injection is solved.
 
 ### T10

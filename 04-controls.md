@@ -6,22 +6,22 @@
 
 | ID | Control | Mitigates |
 |---|---|---|
-| K01 | Keep third-party text out of the prompt where possible, for example by showing transfer descriptions in the app instead of passing them to the model; where such text must be included, mark it as untrusted data and neutralize instructions in it | T01, T02, T08 |
+| K01 | Keep third-party text out of the prompt where possible, for example by showing transfer descriptions in the app instead of passing them to the model; where such text, or any retrieved content, must be included, mark it as data rather than instructions and neutralize instructions in it | T01, T02, T08 |
 | K02 | Confirm state-changing actions outside the model: the model proposes, the app confirms with a native dialog that names the action and the card, and the orchestrator executes only on the app's confirmation, never on the model's word | T02, T01 |
 | K03 | Enforce least privilege at the API layer: delegated per-customer tokens for tool calls, with ownership checked by the core APIs | T05 |
 | K04 | Keep nothing in the system prompt that would cause harm if disclosed, and move escalation criteria into code | T03 |
 | K05 | Treat model output as untrusted input to the app: render replies as plain text, or allow links only to an allowlist of Bank domains, and never render images from model output | T09, T01, T08 |
-| K06 | Add Bank-side input and output filtering on top of the provider's filter, including detection of personal data, of commitments the assistant may not make, and of extraction attempts | T01, T03, T04, T06, T08 |
+| K06 | Add Bank-side input and output filtering on top of the provider's filter, including detection of personal data, of commitments the assistant may not make, and of extraction attempts | T01, T03, T04, T08 |
 | K07 | Set rate limits and token budgets per customer and per session, and limits on state-changing tool calls per customer and per period, with alerts on anomalies | T02, T11 |
 | K08 | Minimize stored data: redact tool results and personal data in transcripts, shorten retention, restrict access by role | T06 |
-| K09 | Put the provider arrangement in order before it runs: a transfer basis under Ley 25.326 art. 12 (model clauses or an adequate territory), a contract that meets BCRA Section 10.3 and binds the provider and its staff to the art. 39 duty of reserve, with zero or shortest retention, no training, no human review or review only under confidentiality, subprocessor consent, notice of law-enforcement requests, breach notification, audit rights and exit assistance; the SEFYC notice under Section 10.1 if the service is critical; documentation under Section 4.6; pre-contract risk assessment per the BCRA AI guide | T07, T10 |
+| K09 | Put the provider arrangement in order: a transfer basis under Ley 25.326 art. 12 (model clauses or an adequate territory), a contract that meets BCRA Section 10.3 and binds the provider and its staff to the art. 39 duty of reserve, with zero or shortest retention, no training, no human review or review only under confidentiality, subprocessor consent, notice of law-enforcement requests, breach notification, audit rights and exit assistance; the SEFYC notice under Section 10.1 if the service is critical; documentation under Section 4.6; pre-contract risk assessment per the BCRA AI guide | T07, T10 |
 | K10 | Govern retrieval content as code: review before indexing, separate the right to publish for people from the right to feed the model, and monitor the integrity of the index | T08 |
 | K11 | Ground answers on fees, rights and procedures in retrieved passages with citations, and refuse or hand off when no passage supports the answer | T04, T12 |
 | K12 | Test before release, on a schedule and on every provider change with an adversarial and accuracy suite; monitor behavior, tool-call patterns and cross-customer calls in production | T01, T02, T03, T04, T05, T10, T12 |
-| K13 | Tell customers they are talking to an AI, what it can and cannot decide, that a third-party provider processes the conversation and where, and keep a clear path to a human | T04, T07, T12 |
+| K13 | Tell customers they are talking to an AI, what it can and cannot decide, that a third-party provider processes the conversation and where, and keep a clear path to a human | T07, T12 |
 | K14 | Mark handoff summaries as model-generated, and require agents to confirm any request directly with the customer before acting on it | T01, T06 |
-| K15 | Notify the customer through a separate channel whenever the assistant changes the state of their account, with a one-tap path in the app to undo it | T02 |
-| K16 | Minimize and pseudonymize what crosses TB2: replace the customer's name and identifier with a session token, pass only the transaction fields the model needs, and drop or truncate free text | T07, T01, T06 |
+| K15 | Notify the customer through a separate channel whenever the assistant changes the state of their account, and point to the app's own path to undo it, with the confirmation the app already requires | T02 |
+| K16 | Minimize and pseudonymize what crosses TB2: replace the customer's name and identifier with a session token, pass only the transaction fields the model needs, and drop or truncate free text | T07, T01 |
 | K17 | Keep an exit strategy: an abstraction layer so the provider can be replaced, a tested fallback (a second provider or a degraded mode without the assistant), and prompts, evaluations and configuration owned by the Bank | T07, T10 |
 
 ## Framework mapping
@@ -50,7 +50,7 @@ Columns: NIST AI RMF 1.0 subcategories; NIST AI 600-1 risk categories (the Gener
 
 Reading the table by framework:
 
-- *NIST AI RMF.* Most controls land in MEASURE 2.7 (security and resilience) and MANAGE 4.1 (post-deployment monitoring), which says that this system's risks are operational more than conceptual. The GOVERN 6 and MAP 4 entries for K09 and K17 are the supply-chain outcomes, and GOVERN 1.1 appears wherever a control exists to meet a legal obligation.
+- *NIST AI RMF.* Eight of the seventeen controls land in MEASURE 2.7 (security and resilience) and six in MANAGE 4.1 (post-deployment monitoring), which says that this system's risks are operational more than conceptual. The GOVERN 6 and MAP 4 entries for K09 and K17 are the supply-chain outcomes, and GOVERN 1.1 marks the controls that exist mainly to meet a legal obligation (K08, K09, K16).
 - *NIST AI 600-1.* Six of the twelve risk categories apply; the other six (such as CBRN information, obscene content and environmental impacts) do not for a banking assistant and are deliberately absent.
 - *ISO/IEC 42001.* The controls cluster in A.6.2 (life cycle), A.8 (information for interested parties), A.9 (use) and A.10 (third parties); A.5 (impact assessment) is not mapped to a single control because this assessment as a whole is the A.5 activity.
 - *ISO/IEC 27001.* K03, K05, K07, K08, K10, K12 and K16 are largely classic controls with an AI-shaped application; their 27001 references show where the Bank's existing baseline already reaches.
