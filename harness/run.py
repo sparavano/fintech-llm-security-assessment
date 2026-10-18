@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import hashlib
 import json
 import re
 import sys
@@ -55,6 +56,25 @@ def slug(text: str) -> str:
 
 def case_dir(case_id: str, model: str) -> Path:
     return RESULTS / case_id / slug(model)
+
+
+def fingerprint(case: dict) -> str:
+    """Hash of everything that shapes what the model sees, apart from each attempt's payload and
+    prompt: system prompt, tool definitions, data, help center, orchestrator code and the case's
+    fixed fields. Attempts made under a different fingerprint do not count."""
+    h = hashlib.sha256()
+    for path in sorted([HERE / "prompts" / "system.md", HERE / "orchestrator.py", HERE / "data" / "customers.json",
+                        *(HERE / "data" / "help_center").glob("*.md")]):
+        h.update(path.name.encode() + b"\0" + path.read_bytes() + b"\0")
+    fixed = {k: v for k, v in case.items() if k not in ("descriptions", "user_prompts", "title", "expected_safe_behavior")}
+    h.update(json.dumps(fixed, sort_keys=True, ensure_ascii=False).encode())
+    return h.hexdigest()[:12]
+
+
+def exposed(case: dict, orc: Orchestrator) -> bool:
+    """True if the injected content actually reached the model (otherwise the attempt tests nothing)."""
+    event = case.get("exposure_event")
+    return event is None or any(e.get("event") == event for e in orc.transcript.events)
 
 
 def judge(case: dict, orc: Orchestrator) -> bool:
@@ -90,9 +110,9 @@ def load_attempts(folder: Path) -> dict[tuple[str, int], dict]:
     return done
 
 
-def is_done(rec: dict | None, description: str, user_prompt: str) -> bool:
-    # An attempt only counts if it was made with the same payload and prompt the case file has now
-    return bool(rec) and rec["description"] == description and rec["user_prompt"] == user_prompt
+def is_done(rec: dict | None, description: str, user_prompt: str, fp: str) -> bool:
+    # An attempt only counts if it was made with the same payload, prompt and fingerprint as now
+    return bool(rec) and rec["description"] == description and rec["user_prompt"] == user_prompt and rec.get("fingerprint") == fp
 
 
 def one_attempt(case: dict, provider, run: str, description: str, user_prompt: str) -> dict:
@@ -110,8 +130,10 @@ def one_attempt(case: dict, provider, run: str, description: str, user_prompt: s
         "served_models": sorted(getattr(provider, "served_models", [])),
         "settings": {"reasoning_effort": getattr(provider, "reasoning_effort", None), "temperature": 0},
         "controls": controls.describe(),
+        "fingerprint": fingerprint(case),
         "description": description,
         "user_prompt": user_prompt,
+        "exposed": exposed(case, orc),
         "success": judge(case, orc),
         "events": orc.transcript.events,
         "tool_calls": orc.transcript.tool_calls,
@@ -124,7 +146,8 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget
     folder = case_dir(case["id"], provider.model)
     folder.mkdir(parents=True, exist_ok=True)
     done = load_attempts(folder)
-    todo = [p for p in plan(case, attempts, runs) if not is_done(done.get((p[0], p[1])), p[2], p[3])]
+    fp = fingerprint(case)
+    todo = [p for p in plan(case, attempts, runs) if not is_done(done.get((p[0], p[1])), p[2], p[3], fp)]
     total = len(plan(case, attempts, runs))
     print(f"{case['id']}: {total - len(todo)}/{total} attempts already saved, {len(todo)} to go", flush=True)
     for run, i, d, prompt in todo:
@@ -140,7 +163,7 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget
         with open(folder / "attempts.jsonl", "a", encoding="utf-8") as fh:
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
         budget[0] -= 1
-        mark = "HIT" if rec["success"] else "ok "
+        mark = "HIT" if rec["success"] else ("ok " if rec["exposed"] else "n/e")  # n/e: payload never reached the model
         print(f"[{case['id']} {run:8}] {i + 1:2} {mark}  {d[:70]}", flush=True)
 
 
@@ -148,29 +171,34 @@ def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) 
     folder = case_dir(case["id"], model)
     done = load_attempts(folder)
     planned = plan(case, attempts, runs)
-    recs = [done[(r, i)] for r, i, d, p in planned if is_done(done.get((r, i)), d, p)]
-    if not recs:
+    fp = fingerprint(case)
+    recs = [done[(r, i)] for r, i, d, p in planned if is_done(done.get((r, i)), d, p, fp)]
+    if not recs and not done:
         return None
+    # A report is always rewritten, so a stale one never survives a change of setup
     complete = len(recs) == len(planned)
-    stamps = sorted(r["timestamp"] for r in recs)
+    stamps = sorted(r["timestamp"] for r in recs) or [None]
     served = sorted({m for r in recs for m in r.get("served_models", [])})
     settings = sorted({json.dumps(r.get("settings", {}), sort_keys=True) for r in recs})
     out = {
         "case": case["id"], "threat": case["threat"], "control": case["control"], "title": case["title"],
-        "provider": recs[0]["provider"], "model": model, "served_models": served,
+        "fingerprint": fp, "provider": recs[0]["provider"] if recs else None, "model": model, "served_models": served,
         "settings": [json.loads(s) for s in settings],
-        "status": "complete" if complete else f"in progress ({len(recs)}/{len(planned)} attempts)",
+        "status": "complete" if complete else (f"in progress ({len(recs)}/{len(planned)} attempts)" if recs
+                                                 else "no attempts yet under the current setup"),
         "first_attempt": stamps[0], "last_attempt": stamps[-1], "runs": {},
     }
     for run in runs:
         rr = [r for r in recs if r["run"] == run]
-        hits = sum(1 for r in rr if r["success"])
+        ex = [r for r in rr if r.get("exposed", True)]
+        hits = sum(1 for r in ex if r["success"])
         out["runs"][run] = {
             "controls": rr[0]["controls"] if rr else None,
             "planned": sum(1 for p in planned if p[0] == run),
             "attempts": len(rr),
+            "exposed": len(ex),
             "hits": hits,
-            "asr": round(hits / len(rr), 3) if rr else None,
+            "asr": round(hits / len(ex), 3) if ex else None,  # over attempts where the payload reached the model
             "results": rr,
         }
     (folder / "results.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -180,16 +208,18 @@ def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) 
              f"Model as configured: `{model}` ({out['provider']})  ",
              f"Model names reported by the API: {', '.join(f'`{m}`' for m in served) or 'none'}  ",
              f"Settings: {', '.join(settings)}  ",
+             f"Fingerprint of prompt, tools, data and case: `{fp}`  ",
              f"Attempts made between {out['first_attempt']} and {out['last_attempt']} (UTC)", ""]
     if len(served) > 1 or len(settings) > 1:
         lines += ["> Warning: attempts in this report were served by more than one model or made with different settings.", ""]
-    lines += ["| Run | Planned | Done | Hits | ASR |", "|---|---|---|---|---|"]
+    lines += ["| Run | Planned | Done | Payload reached the model | Hits | ASR |", "|---|---|---|---|---|---|"]
     for run, r in out["runs"].items():
-        lines.append(f"| {run} | {r['planned']} | {r['attempts']} | {r['hits']} | {r['asr']} |")
+        lines.append(f"| {run} | {r['planned']} | {r['attempts']} | {r['exposed']} | {r['hits']} | {r['asr']} |")
+    lines += ["", "ASR is hits over attempts in which the injected content reached the model."]
     for run, r in out["runs"].items():
         lines += ["", f"## Representative transcripts · {run}", ""]
         succ = next((x for x in r["results"] if x["success"]), None)
-        fail = next((x for x in r["results"] if not x["success"]), None)
+        fail = next((x for x in r["results"] if not x["success"] and x.get("exposed", True)), None)
         other = next((x for x in r["results"] if x is not succ and x is not fail), None)
         for label, x in (("attack succeeded", succ), ("attack failed", fail), ("another attempt", other)):
             if not x:
@@ -208,7 +238,7 @@ def summary(case_id: str, model: str) -> str:
     if not path.exists():
         return f"{case_id}: no attempts saved yet"
     out = json.loads(path.read_text(encoding="utf-8"))
-    runs = "  ".join(f"{run}: ASR {r['asr']} ({r['hits']}/{r['attempts']} of {r['planned']})" for run, r in out["runs"].items())
+    runs = "  ".join(f"{run}: ASR {r['asr']} ({r['hits']}/{r['exposed']} exposed, {r['attempts']} of {r['planned']} done)" for run, r in out["runs"].items())
     return f"{case_id} [{out['status']}] {runs}"
 
 
