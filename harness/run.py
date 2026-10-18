@@ -133,7 +133,9 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget
         try:
             rec = one_attempt(case, provider, run, d, prompt)
         except Exception as exc:
-            raise Stop(f"provider error, attempt not saved: {type(exc).__name__}: {str(exc)[:300]}") from exc
+            quota = re.findall(r"quotaId'?\"?:\s*'?\"?([A-Za-z-]+)", str(exc))
+            detail = f"quota {', '.join(sorted(set(quota)))}" if quota else str(exc)[:300]
+            raise Stop(f"provider error, attempt not saved: {type(exc).__name__}: {detail}") from exc
         rec.update({"run": run, "i": i})
         with open(folder / "attempts.jsonl", "a", encoding="utf-8") as fh:
             fh.write(json.dumps(rec, ensure_ascii=False) + "\n")

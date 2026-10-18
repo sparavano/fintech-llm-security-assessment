@@ -18,7 +18,7 @@ cd harness
 pip install -r requirements.txt
 
 # Gemini, through its OpenAI-compatible endpoint (the key goes in OPENAI_API_KEY)
-export PROVIDER=openai MODEL=gemini-3.5-flash REASONING_EFFORT=low MIN_INTERVAL=13 OPENAI_API_KEY=<Gemini API key>
+export PROVIDER=openai MODEL=gemini-3.5-flash REASONING_EFFORT=low MIN_INTERVAL=15 OPENAI_API_KEY=<Gemini API key>
 export OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
 
 # OpenAI, or any other OpenAI-compatible endpoint (unset OPENAI_BASE_URL for OpenAI itself)

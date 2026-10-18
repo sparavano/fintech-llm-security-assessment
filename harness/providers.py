@@ -10,7 +10,7 @@ Configuration comes from environment variables so no key ever lives in the repo:
   REASONING_EFFORT  optional, passed as reasoning_effort to OpenAI-compatible endpoints
   REQUEST_TIMEOUT, MAX_RETRIES   per-request timeout in seconds (default 90) and SDK retries (default 2)
   MIN_INTERVAL      minimum seconds between requests (default 0), to stay under a per-minute quota;
-                    a per-minute 429 is waited out and retried, a daily one stops the run
+                    a rate-limit 429 is waited out and retried, unless it names a daily quota
   OPENAI_API_KEY, OPENAI_BASE_URL   for any OpenAI-compatible endpoint (OpenAI, Groq,
                                     Gemini's compatibility endpoint, a local Ollama server...)
   ANTHROPIC_API_KEY                 for Anthropic
@@ -99,7 +99,8 @@ class OpenAICompatible:
                 return self.client.chat.completions.create(**kwargs)
             except Exception as exc:
                 text = str(exc)
-                if "429" in text and "PerMinute" in text and retry < 5:
+                # A daily quota stops the run; any other rate limit (per minute, tokens) is waited out
+                if "429" in text and "PerDay" not in text and retry < 5:
                     delay = re.search(r"retryDelay'?\"?:\s*'?\"?(\d+)", text)
                     time.sleep((int(delay.group(1)) if delay else 30) + 2)
                     continue
