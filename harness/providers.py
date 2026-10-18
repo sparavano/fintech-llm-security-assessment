@@ -9,6 +9,8 @@ Configuration comes from environment variables so no key ever lives in the repo:
   MODEL           model name, recorded in results   (required for openai/anthropic)
   REASONING_EFFORT  optional, passed as reasoning_effort to OpenAI-compatible endpoints
   REQUEST_TIMEOUT, MAX_RETRIES   per-request timeout in seconds (default 90) and SDK retries (default 2)
+  MIN_INTERVAL      minimum seconds between requests (default 0), to stay under a per-minute quota;
+                    a per-minute 429 is waited out and retried, a daily one stops the run
   OPENAI_API_KEY, OPENAI_BASE_URL   for any OpenAI-compatible endpoint (OpenAI, Groq,
                                     Gemini's compatibility endpoint, a local Ollama server...)
   ANTHROPIC_API_KEY                 for Anthropic
@@ -18,6 +20,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import time
 from typing import Any
 
 
@@ -44,6 +47,8 @@ class OpenAICompatible:
         self.model = model
         self.reasoning_effort = os.environ.get("REASONING_EFFORT") or None
         self.served_models: set[str] = set()  # model names the API reports back; an alias can resolve elsewhere
+        self.min_interval = float(os.environ.get("MIN_INTERVAL", "0"))
+        self._last_request = 0.0
         self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL") or None,
                              timeout=float(os.environ.get("REQUEST_TIMEOUT", "90")),
                              max_retries=int(os.environ.get("MAX_RETRIES", "2")))
@@ -67,7 +72,7 @@ class OpenAICompatible:
                 oai_msgs.append({"role": m["role"], "content": m["content"]})
         oai_tools = [{"type": "function", "function": t} for t in tools]
         extra = {"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}
-        resp = self.client.chat.completions.create(model=self.model, messages=oai_msgs, tools=oai_tools, temperature=0, **extra)
+        resp = self._create(model=self.model, messages=oai_msgs, tools=oai_tools, temperature=0, **extra)
         if getattr(resp, "model", None):
             self.served_models.add(resp.model)
         msg = resp.choices[0].message
@@ -82,6 +87,23 @@ class OpenAICompatible:
                 call["extra"] = dict(c.model_extra)
             calls.append(call)
         return {"text": msg.content, "tool_calls": calls}
+
+    def _create(self, **kwargs):
+        """Pace requests and wait out per-minute rate limits. A daily quota error is raised."""
+        for retry in range(6):
+            wait = self.min_interval - (time.monotonic() - self._last_request)
+            if wait > 0:
+                time.sleep(wait)
+            self._last_request = time.monotonic()
+            try:
+                return self.client.chat.completions.create(**kwargs)
+            except Exception as exc:
+                text = str(exc)
+                if "429" in text and "PerMinute" in text and retry < 5:
+                    delay = re.search(r"retryDelay'?\"?:\s*'?\"?(\d+)", text)
+                    time.sleep((int(delay.group(1)) if delay else 30) + 2)
+                    continue
+                raise
 
 
 class AnthropicProvider:
