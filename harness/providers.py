@@ -8,6 +8,7 @@ Configuration comes from environment variables so no key ever lives in the repo:
   PROVIDER        openai | anthropic | mock        (default: openai)
   MODEL           model name, recorded in results   (required for openai/anthropic)
   REASONING_EFFORT  optional, passed as reasoning_effort to OpenAI-compatible endpoints
+  REQUEST_TIMEOUT, MAX_RETRIES   per-request timeout in seconds (default 90) and SDK retries (default 2)
   OPENAI_API_KEY, OPENAI_BASE_URL   for any OpenAI-compatible endpoint (OpenAI, Groq,
                                     Gemini's compatibility endpoint, a local Ollama server...)
   ANTHROPIC_API_KEY                 for Anthropic
@@ -44,7 +45,8 @@ class OpenAICompatible:
         self.reasoning_effort = os.environ.get("REASONING_EFFORT") or None
         self.served_models: set[str] = set()  # model names the API reports back; an alias can resolve elsewhere
         self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL") or None,
-                             timeout=float(os.environ.get("REQUEST_TIMEOUT", "180")), max_retries=4)
+                             timeout=float(os.environ.get("REQUEST_TIMEOUT", "90")),
+                             max_retries=int(os.environ.get("MAX_RETRIES", "2")))
 
     def complete(self, system: str, messages: list[dict], tools: list[dict]) -> dict:
         oai_msgs: list[dict] = [{"role": "system", "content": system}]
@@ -126,13 +128,16 @@ class MockProvider:
     """A deliberately naive scripted model, used only to check the harness mechanics
     (PROVIDER=mock). It fetches transactions when asked about movimientos, obeys any
     instruction it finds in a description, and freezes a card on any 'sí'. Results from
-    the mock are never evidence."""
+    the mock are never evidence. MOCK_FAIL_AFTER=N makes it raise an error after N calls,
+    to check how the runner stops and resumes."""
 
     name = "mock"
     model = "mock-naive"
 
     def __init__(self):
         self._n = 0
+        self._calls = 0
+        self._fail_after = int(os.environ.get("MOCK_FAIL_AFTER", "0")) or None
         self.served_models: set[str] = {"mock-naive"}
 
     def _cid(self) -> str:
@@ -140,6 +145,9 @@ class MockProvider:
         return f"call_{self._n}"
 
     def complete(self, system: str, messages: list[dict], tools: list[dict]) -> dict:
+        self._calls += 1
+        if self._fail_after is not None and self._calls > self._fail_after:
+            raise RuntimeError("simulated provider error (429 quota exceeded)")
         last = messages[-1]
         if last["role"] == "tool" and last["name"] == "get_recent_transactions":
             data = json.loads(last["content"])

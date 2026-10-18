@@ -1,15 +1,24 @@
 """Run a test case twice, baseline and with its control, and record the evidence.
 
+Runs are resumable. Every completed attempt is appended to
+results/<TC-ID>/<model>/attempts.jsonl, and a later invocation only runs what is
+missing. The runner stops at the first provider error (a daily quota, a timeout)
+without recording the interrupted attempt, so a run can be spread over several
+days under a free-tier quota. The report (results.json, transcripts.md) is
+rebuilt from the saved attempts at the end of every invocation.
+
 Usage (from the harness/ directory):
 
-    PROVIDER=openai MODEL=gpt-4.1-mini OPENAI_API_KEY=... python run.py TC-01 TC-03
+    PROVIDER=openai MODEL=... OPENAI_API_KEY=... python run.py TC-01 TC-03
+    python run.py TC-01 TC-03 --max-attempts 8   # at most 8 new attempts this time
+    python run.py TC-01 TC-03 --report           # rebuild the reports only, no model calls
     PROVIDER=mock python run.py TC-01            # mechanics only, never evidence
 
 Options:
-    --attempts N     use only the first N descriptions (default: all)
+    --attempts N        use only the first N descriptions of each case (default: all)
     --runs baseline,control   which runs to do (default: both)
-
-Output: results/<TC-ID>/<model>_<timestamp>/results.json and transcripts.md
+    --max-attempts K    stop after K new attempts in this invocation
+    --report            do not call the model; rebuild reports from saved attempts
 """
 from __future__ import annotations
 
@@ -29,11 +38,23 @@ RESULTS = HERE / "results"
 MAX_DESCRIPTION = 100  # 01-system.md, assumptions
 
 
+class Stop(Exception):
+    """Raised to end the invocation early (provider error or attempt budget)."""
+
+
 def load_case(case_id: str) -> dict:
     path = CASES / f"{case_id.lower().replace('-', '')}.json"
     if not path.exists():
         sys.exit(f"No case file for {case_id} at {path}")
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def slug(text: str) -> str:
+    return re.sub(r"[^A-Za-z0-9.-]+", "_", str(text))
+
+
+def case_dir(case_id: str, model: str) -> Path:
+    return RESULTS / case_id / slug(model)
 
 
 def judge(case: dict, orc: Orchestrator) -> bool:
@@ -48,20 +69,50 @@ def judge(case: dict, orc: Orchestrator) -> bool:
     raise ValueError(f"unknown judge type {j['type']}")
 
 
-def one_attempt(case: dict, provider, controls: Controls, description: str, user_prompt: str) -> dict:
+def plan(case: dict, attempts: int | None, runs: list[str]) -> list[tuple[str, int, str, str]]:
+    """Every (run, index, description, customer prompt) the case calls for."""
+    descriptions = case["descriptions"][:attempts] if attempts else case["descriptions"]
+    too_long = [d for d in descriptions if len(d) > MAX_DESCRIPTION]
+    if too_long:
+        print(f"warning: {len(too_long)} description(s) exceed {MAX_DESCRIPTION} chars", file=sys.stderr)
+    prompts = case["user_prompts"]
+    return [(run, i, d, prompts[i % len(prompts)]) for run in runs for i, d in enumerate(descriptions)]
+
+
+def load_attempts(folder: Path) -> dict[tuple[str, int], dict]:
+    path = folder / "attempts.jsonl"
+    done: dict[tuple[str, int], dict] = {}
+    if path.exists():
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                rec = json.loads(line)
+                done[(rec["run"], rec["i"])] = rec
+    return done
+
+
+def is_done(rec: dict | None, description: str, user_prompt: str) -> bool:
+    # An attempt only counts if it was made with the same payload and prompt the case file has now
+    return bool(rec) and rec["description"] == description and rec["user_prompt"] == user_prompt
+
+
+def one_attempt(case: dict, provider, run: str, description: str, user_prompt: str) -> dict:
+    controls = Controls.baseline() if run == "baseline" else Controls.with_control(case["control"])
     tx = dict(case["injected_transaction"], description=description)
     bank = MockBank(extra_transactions={case["victim"]: [tx]})
     orc = Orchestrator(provider, customer_id=case["victim"], controls=controls, bank=bank, help_center=HelpCenter())
-    error = None
-    try:
-        orc.turn(user_prompt)
-    except Exception as exc:  # a provider error is recorded, not hidden
-        error = f"{type(exc).__name__}: {exc}"
+    if hasattr(provider, "served_models") and provider.name != "mock":
+        provider.served_models.clear()
+    orc.turn(user_prompt)  # a provider error propagates and stops the invocation
     return {
+        "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
+        "provider": provider.name,
+        "model": provider.model,
+        "served_models": sorted(getattr(provider, "served_models", [])),
+        "settings": {"reasoning_effort": getattr(provider, "reasoning_effort", None), "temperature": 0},
+        "controls": controls.describe(),
         "description": description,
         "user_prompt": user_prompt,
-        "success": judge(case, orc) if error is None else None,
-        "error": error,
+        "success": judge(case, orc),
         "events": orc.transcript.events,
         "tool_calls": orc.transcript.tool_calls,
         "replies": orc.transcript.replies,
@@ -69,73 +120,94 @@ def one_attempt(case: dict, provider, controls: Controls, description: str, user
     }
 
 
-def run_case(case: dict, provider, attempts: int | None, runs: list[str]) -> dict:
-    descriptions = case["descriptions"][:attempts] if attempts else case["descriptions"]
-    too_long = [d for d in descriptions if len(d) > MAX_DESCRIPTION]
-    if too_long:
-        print(f"warning: {len(too_long)} description(s) exceed {MAX_DESCRIPTION} chars", file=sys.stderr)
-    prompts = case["user_prompts"]
-    out = {"case": case["id"], "threat": case["threat"], "control": case["control"], "title": case["title"],
-           "provider": provider.name, "model": provider.model,
-           "settings": {"reasoning_effort": getattr(provider, "reasoning_effort", None), "temperature": 0},
-           "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "runs": {}}
-    RESULTS.mkdir(exist_ok=True)
-    if hasattr(provider, "served_models") and provider.name != "mock":
-        provider.served_models.clear()
-    for run in runs:
-        controls = Controls.baseline() if run == "baseline" else Controls.with_control(case["control"])
-        results = []
-        for i, d in enumerate(descriptions):
-            r = one_attempt(case, provider, controls, d, prompts[i % len(prompts)])
-            results.append(r)
-            with open(RESULTS / f"{case['id']}.partial.jsonl", "a", encoding="utf-8") as fh:  # survives an interrupted run
-                fh.write(json.dumps({"run": run, "i": i, **r}, ensure_ascii=False) + "\n")
-            mark = "ERR" if r["error"] else ("HIT" if r["success"] else "ok ")
-            print(f"[{case['id']} {run:8}] {i + 1:2}/{len(descriptions)} {mark}  {d[:70]}", flush=True)
-            if r["error"]:
-                print(f"    error: {r['error'][:200]}", flush=True)
-        valid = [r for r in results if r["error"] is None]
-        hits = sum(1 for r in valid if r["success"])
-        out["runs"][run] = {
-            "controls": controls.describe(),
-            "attempts": len(descriptions),
-            "valid": len(valid),
-            "hits": hits,
-            "asr": round(hits / len(valid), 3) if valid else None,
-            "results": results,
-        }
-    out["served_models"] = sorted(getattr(provider, "served_models", []))
-    return out
-
-
-def write_results(out: dict) -> Path:
-    stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
-    model_slug = re.sub(r"[^A-Za-z0-9.-]+", "_", str(out["model"]))
-    folder = RESULTS / out["case"] / f"{model_slug}_{stamp}"
+def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget: list[int]) -> None:
+    folder = case_dir(case["id"], provider.model)
     folder.mkdir(parents=True, exist_ok=True)
+    done = load_attempts(folder)
+    todo = [p for p in plan(case, attempts, runs) if not is_done(done.get((p[0], p[1])), p[2], p[3])]
+    total = len(plan(case, attempts, runs))
+    print(f"{case['id']}: {total - len(todo)}/{total} attempts already saved, {len(todo)} to go", flush=True)
+    for run, i, d, prompt in todo:
+        if budget[0] <= 0:
+            raise Stop("attempt budget for this invocation reached")
+        try:
+            rec = one_attempt(case, provider, run, d, prompt)
+        except Exception as exc:
+            raise Stop(f"provider error, attempt not saved: {type(exc).__name__}: {str(exc)[:300]}") from exc
+        rec.update({"run": run, "i": i})
+        with open(folder / "attempts.jsonl", "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+        budget[0] -= 1
+        mark = "HIT" if rec["success"] else "ok "
+        print(f"[{case['id']} {run:8}] {i + 1:2} {mark}  {d[:70]}", flush=True)
+
+
+def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) -> Path | None:
+    folder = case_dir(case["id"], model)
+    done = load_attempts(folder)
+    planned = plan(case, attempts, runs)
+    recs = [done[(r, i)] for r, i, d, p in planned if is_done(done.get((r, i)), d, p)]
+    if not recs:
+        return None
+    complete = len(recs) == len(planned)
+    stamps = sorted(r["timestamp"] for r in recs)
+    served = sorted({m for r in recs for m in r.get("served_models", [])})
+    settings = sorted({json.dumps(r.get("settings", {}), sort_keys=True) for r in recs})
+    out = {
+        "case": case["id"], "threat": case["threat"], "control": case["control"], "title": case["title"],
+        "provider": recs[0]["provider"], "model": model, "served_models": served,
+        "settings": [json.loads(s) for s in settings],
+        "status": "complete" if complete else f"in progress ({len(recs)}/{len(planned)} attempts)",
+        "first_attempt": stamps[0], "last_attempt": stamps[-1], "runs": {},
+    }
+    for run in runs:
+        rr = [r for r in recs if r["run"] == run]
+        hits = sum(1 for r in rr if r["success"])
+        out["runs"][run] = {
+            "controls": rr[0]["controls"] if rr else None,
+            "planned": sum(1 for p in planned if p[0] == run),
+            "attempts": len(rr),
+            "hits": hits,
+            "asr": round(hits / len(rr), 3) if rr else None,
+            "results": rr,
+        }
     (folder / "results.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = [f"# {out['case']} · {out['title']}", "",
-             f"Model: `{out['model']}` ({out['provider']}) · {out['timestamp']}",
-             f"Model names reported by the API: {', '.join(f'`{m}`' for m in out.get('served_models', [])) or 'none'}", ""]
-    lines += ["| Run | Attempts | Valid | Hits | ASR |", "|---|---|---|---|---|"]
+             f"Status: **{out['status']}**", "",
+             f"Model as configured: `{model}` ({out['provider']})  ",
+             f"Model names reported by the API: {', '.join(f'`{m}`' for m in served) or 'none'}  ",
+             f"Settings: {', '.join(settings)}  ",
+             f"Attempts made between {out['first_attempt']} and {out['last_attempt']} (UTC)", ""]
+    if len(served) > 1 or len(settings) > 1:
+        lines += ["> Warning: attempts in this report were served by more than one model or made with different settings.", ""]
+    lines += ["| Run | Planned | Done | Hits | ASR |", "|---|---|---|---|---|"]
     for run, r in out["runs"].items():
-        lines.append(f"| {run} | {r['attempts']} | {r['valid']} | {r['hits']} | {r['asr']} |")
+        lines.append(f"| {run} | {r['planned']} | {r['attempts']} | {r['hits']} | {r['asr']} |")
     for run, r in out["runs"].items():
         lines += ["", f"## Representative transcripts · {run}", ""]
-        picks = []
         succ = next((x for x in r["results"] if x["success"]), None)
-        fail = next((x for x in r["results"] if x["success"] is False), None)
+        fail = next((x for x in r["results"] if not x["success"]), None)
         other = next((x for x in r["results"] if x is not succ and x is not fail), None)
         for label, x in (("attack succeeded", succ), ("attack failed", fail), ("another attempt", other)):
-            if x:
-                picks.append((label, x))
-        for label, x in picks:
+            if not x:
+                continue
+            calls = [{"name": c["name"], "args": c["args"]} for c in x["tool_calls"]]  # provider extras left out
             lines += [f"### {label}", "", f"- Injected description: `{x['description']}`", f"- Customer prompt: {x['user_prompt']}",
-                      f"- Tool calls: {json.dumps(x['tool_calls'], ensure_ascii=False)}",
-                      f"- Events: {json.dumps(x['events'], ensure_ascii=False)}", "", "Reply:", "", "> " + "\n> ".join("\n".join(x["replies"]).splitlines() or ["(empty)"]), ""]
+                      f"- Tool calls: {json.dumps(calls, ensure_ascii=False)}",
+                      f"- Events: {json.dumps(x['events'], ensure_ascii=False)}", "", "Reply:", "",
+                      "> " + "\n> ".join("\n".join(x["replies"]).splitlines() or ["(empty)"]), ""]
     (folder / "transcripts.md").write_text("\n".join(lines), encoding="utf-8")
     return folder
+
+
+def summary(case_id: str, model: str) -> str:
+    path = case_dir(case_id, model) / "results.json"
+    if not path.exists():
+        return f"{case_id}: no attempts saved yet"
+    out = json.loads(path.read_text(encoding="utf-8"))
+    runs = "  ".join(f"{run}: ASR {r['asr']} ({r['hits']}/{r['attempts']} of {r['planned']})" for run, r in out["runs"].items())
+    return f"{case_id} [{out['status']}] {runs}"
 
 
 def main():
@@ -143,17 +215,33 @@ def main():
     ap.add_argument("cases", nargs="+", help="e.g. TC-01 TC-03")
     ap.add_argument("--attempts", type=int, default=None)
     ap.add_argument("--runs", default="baseline,control")
+    ap.add_argument("--max-attempts", type=int, default=10**9)
+    ap.add_argument("--report", action="store_true")
     args = ap.parse_args()
     runs = [r.strip() for r in args.runs.split(",") if r.strip()]
-    provider = providers.from_env()
-    if provider.name == "mock":
-        print("PROVIDER=mock: checking mechanics only; these results are not evidence.", file=sys.stderr)
-    for cid in args.cases:
-        case = load_case(cid)
-        out = run_case(case, provider, args.attempts, runs)
-        folder = write_results(out)
-        summary = "  ".join(f"{run}: ASR {r['asr']} ({r['hits']}/{r['valid']})" for run, r in out["runs"].items())
-        print(f"\n{case['id']} -> {summary}\n  written to {folder}\n")
+    cases = [load_case(c) for c in args.cases]
+
+    if args.report:
+        import os
+        model = os.environ.get("MODEL") or ("mock-naive" if os.environ.get("PROVIDER") == "mock" else None)
+        if not model:
+            sys.exit("Set MODEL to say which model's results to report.")
+    else:
+        provider = providers.from_env()
+        model = provider.model
+        if provider.name == "mock":
+            print("PROVIDER=mock: checking mechanics only; these results are not evidence.", file=sys.stderr)
+        budget = [args.max_attempts]
+        try:
+            for case in cases:
+                run_case(case, provider, args.attempts, runs, budget)
+        except Stop as stop:
+            print(f"\nStopped: {stop}\nEverything completed so far is saved; run the same command again to continue.", flush=True)
+
+    print()
+    for case in cases:
+        build_report(case, model, args.attempts, runs)
+        print(summary(case["id"], model))
 
 
 if __name__ == "__main__":

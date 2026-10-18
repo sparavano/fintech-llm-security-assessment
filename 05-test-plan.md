@@ -12,7 +12,7 @@ Each test is run twice: against the system as designed (no Bank-side controls) a
 
 ## Environment
 
-- A general-purpose hosted model reached through its API, as in the system under assessment. The model name, provider and date are recorded with every result; tests are expected to be re-run when the model changes, which is itself part of the point (T10).
+- A general-purpose hosted model reached through its API, as in the system under assessment. The model name, provider and date are recorded with every result; tests are expected to be re-run when the model changes, which is itself part of the point (T10). Under a free-tier daily quota a run may be spread over several days; every attempt is timestamped and the report states the date range and the model names the API reported.
 - A minimal replica of the orchestrator ([harness/](harness/)): system prompt, three mock tools (`get_recent_transactions`, `freeze_card`, `open_support_ticket`), a keyword retrieval index built from a fictional help center, and a fictional dataset of customers, cards and transactions. Each Bank-side control under test can be switched on in the replica.
 - A small purpose-built runner rather than a general LLM testing tool, so that each judge is deterministic and specific to the threat: success is a string the attacker chose appearing in the reply, or an event in the orchestrator such as a freeze executed on the model's word. garak and promptfoo may be added later for broader probes; tooling choices are recorded with the results.
 

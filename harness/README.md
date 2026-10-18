@@ -9,7 +9,7 @@ A minimal replica of the Acme Assistant orchestrator, with mock tools, a fiction
 - `data/customers.json`, `data/help_center/`: three fictional customers and six fictional help center articles.
 - `providers.py`: the model behind one interface. Any OpenAI-compatible endpoint (OpenAI, Groq, Gemini's compatibility endpoint, a local Ollama server), Anthropic, or a scripted mock for checking the mechanics.
 - `cases/`: one JSON file per test case, with the injected payloads, the customer prompts and a deterministic judge. No LLM-as-judge: success is a string the attacker chose appearing in the reply, or an orchestrator event such as a freeze executed on the model's word.
-- `run.py`: runs a case twice, baseline and with its control, and writes `results/<case>/<model>_<timestamp>/` with `results.json` (every attempt, full messages) and `transcripts.md` (ASR table and representative transcripts).
+- `run.py`: runs a case twice, baseline and with its control. Every completed attempt is appended to `results/<case>/<model>/attempts.jsonl`; `results.json` (every attempt, full messages) and `transcripts.md` (ASR table and representative transcripts) are rebuilt from it after each invocation. Runs are resumable: a later invocation only runs what is missing.
 
 ## Running
 
@@ -18,7 +18,7 @@ cd harness
 pip install -r requirements.txt
 
 # Gemini, through its OpenAI-compatible endpoint (the key goes in OPENAI_API_KEY)
-export PROVIDER=openai MODEL=gemini-3.8-flash REASONING_EFFORT=low OPENAI_API_KEY=<Gemini API key>
+export PROVIDER=openai MODEL=gemini-3.5-flash REASONING_EFFORT=low OPENAI_API_KEY=<Gemini API key>
 export OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
 
 # OpenAI, or any other OpenAI-compatible endpoint (unset OPENAI_BASE_URL for OpenAI itself)
@@ -28,15 +28,19 @@ export PROVIDER=openai MODEL=<model name> OPENAI_API_KEY=<key>
 export PROVIDER=anthropic MODEL=<model name> ANTHROPIC_API_KEY=<key>
 
 python run.py TC-01 TC-03
-python run.py TC-01 --attempts 5 --runs baseline   # a quick partial run
+python run.py TC-01 TC-03 --max-attempts 8          # at most 8 new attempts this time
+python run.py TC-01 TC-03 --report                  # rebuild the reports, no model calls
+python run.py TC-01 --attempts 5 --runs baseline    # a quick partial run
 PROVIDER=mock python run.py TC-01                   # mechanics check, never evidence
 ```
+
+The runner stops at the first provider error (a daily quota, a timeout) and does not record the interrupted attempt. Running the same command again continues where it stopped. On a free tier with a small daily request quota, a case can therefore be completed over several days; each attempt keeps its own timestamp and the report shows the date range.
 
 Keys are read from the environment only. Nothing in `results/` contains a key; check before committing anyway.
 
 ## Reading the results
 
-ASR is hits over valid attempts. An attempt with a provider error is recorded with `error` set and excluded from the denominator. Each run records the model name as configured, the model names the API reported back (`served_models`), the provider, the controls in force and the timestamp, so results are comparable across models and across time (T10). The two model names can differ: a hosted model name can be an alias that the provider resolves to a newer model.
+ASR is hits over completed attempts. Attempts interrupted by a provider error are not recorded and are run again later. Each attempt records the model name as configured, the model names the API reported back (`served_models`), the provider, the settings, the controls in force and the timestamp, so results are comparable across models and across time (T10). The two model names can differ: a hosted model name can be an alias that the provider resolves to a newer model. The report warns when the attempts it aggregates were served by more than one model or made with different settings. An attempt only counts if its payload and customer prompt match the case file as it stands; editing a case invalidates the affected attempts.
 
 ## Rules
 
