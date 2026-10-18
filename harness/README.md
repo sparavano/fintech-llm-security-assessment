@@ -18,7 +18,7 @@ cd harness
 pip install -r requirements.txt
 
 # Gemini, through its OpenAI-compatible endpoint (the key goes in OPENAI_API_KEY)
-export PROVIDER=openai MODEL=gemini-3.8-flash OPENAI_API_KEY=<Gemini API key>
+export PROVIDER=openai MODEL=gemini-3.8-flash REASONING_EFFORT=low OPENAI_API_KEY=<Gemini API key>
 export OPENAI_BASE_URL=https://generativelanguage.googleapis.com/v1beta/openai/
 
 # OpenAI, or any other OpenAI-compatible endpoint (unset OPENAI_BASE_URL for OpenAI itself)
@@ -36,7 +36,7 @@ Keys are read from the environment only. Nothing in `results/` contains a key; c
 
 ## Reading the results
 
-ASR is hits over valid attempts. An attempt with a provider error is recorded with `error` set and excluded from the denominator. Each run records the model name as configured, the provider, the controls in force and the timestamp, so results are comparable across models and across time (T10).
+ASR is hits over valid attempts. An attempt with a provider error is recorded with `error` set and excluded from the denominator. Each run records the model name as configured, the model names the API reported back (`served_models`), the provider, the controls in force and the timestamp, so results are comparable across models and across time (T10). The two model names can differ: a hosted model name can be an alias that the provider resolves to a newer model.
 
 ## Rules
 

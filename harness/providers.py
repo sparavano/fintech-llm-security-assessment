@@ -7,6 +7,7 @@ Configuration comes from environment variables so no key ever lives in the repo:
 
   PROVIDER        openai | anthropic | mock        (default: openai)
   MODEL           model name, recorded in results   (required for openai/anthropic)
+  REASONING_EFFORT  optional, passed as reasoning_effort to OpenAI-compatible endpoints
   OPENAI_API_KEY, OPENAI_BASE_URL   for any OpenAI-compatible endpoint (OpenAI, Groq,
                                     Gemini's compatibility endpoint, a local Ollama server...)
   ANTHROPIC_API_KEY                 for Anthropic
@@ -40,7 +41,10 @@ class OpenAICompatible:
         from openai import OpenAI  # lazy import so the mock works without the SDK
 
         self.model = model
-        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL") or None)
+        self.reasoning_effort = os.environ.get("REASONING_EFFORT") or None
+        self.served_models: set[str] = set()  # model names the API reports back; an alias can resolve elsewhere
+        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"), base_url=os.environ.get("OPENAI_BASE_URL") or None,
+                             timeout=float(os.environ.get("REQUEST_TIMEOUT", "180")), max_retries=4)
 
     def complete(self, system: str, messages: list[dict], tools: list[dict]) -> dict:
         oai_msgs: list[dict] = [{"role": "system", "content": system}]
@@ -50,7 +54,8 @@ class OpenAICompatible:
                     "role": "assistant",
                     "content": m.get("content") or None,
                     "tool_calls": [
-                        {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["args"], ensure_ascii=False)}}
+                        {"id": c["id"], "type": "function", "function": {"name": c["name"], "arguments": json.dumps(c["args"], ensure_ascii=False)},
+                         **c.get("extra", {})}  # e.g. Gemini's thought_signature, which must be sent back
                         for c in m["tool_calls"]
                     ],
                 })
@@ -59,7 +64,10 @@ class OpenAICompatible:
             else:
                 oai_msgs.append({"role": m["role"], "content": m["content"]})
         oai_tools = [{"type": "function", "function": t} for t in tools]
-        resp = self.client.chat.completions.create(model=self.model, messages=oai_msgs, tools=oai_tools, temperature=0)
+        extra = {"reasoning_effort": self.reasoning_effort} if self.reasoning_effort else {}
+        resp = self.client.chat.completions.create(model=self.model, messages=oai_msgs, tools=oai_tools, temperature=0, **extra)
+        if getattr(resp, "model", None):
+            self.served_models.add(resp.model)
         msg = resp.choices[0].message
         calls = []
         for c in msg.tool_calls or []:
@@ -67,7 +75,10 @@ class OpenAICompatible:
                 args = json.loads(c.function.arguments or "{}")
             except json.JSONDecodeError:
                 args = {"_raw": c.function.arguments}
-            calls.append({"id": c.id, "name": c.function.name, "args": args})
+            call = {"id": c.id, "name": c.function.name, "args": args}
+            if getattr(c, "model_extra", None):
+                call["extra"] = dict(c.model_extra)
+            calls.append(call)
         return {"text": msg.content, "tool_calls": calls}
 
 
@@ -78,6 +89,7 @@ class AnthropicProvider:
         import anthropic
 
         self.model = model
+        self.served_models: set[str] = set()
         self.client = anthropic.Anthropic()
 
     def complete(self, system: str, messages: list[dict], tools: list[dict]) -> dict:
@@ -99,6 +111,8 @@ class AnthropicProvider:
                 a_msgs.append({"role": m["role"], "content": m["content"]})
         a_tools = [{"name": t["name"], "description": t["description"], "input_schema": t["parameters"]} for t in tools]
         resp = self.client.messages.create(model=self.model, system=system, messages=a_msgs, tools=a_tools, max_tokens=1024, temperature=0)
+        if getattr(resp, "model", None):
+            self.served_models.add(resp.model)
         text_parts, calls = [], []
         for b in resp.content:
             if b.type == "text":
@@ -119,6 +133,7 @@ class MockProvider:
 
     def __init__(self):
         self._n = 0
+        self.served_models: set[str] = {"mock-naive"}
 
     def _cid(self) -> str:
         self._n += 1

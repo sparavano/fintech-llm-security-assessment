@@ -77,15 +77,23 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str]) -> dic
     prompts = case["user_prompts"]
     out = {"case": case["id"], "threat": case["threat"], "control": case["control"], "title": case["title"],
            "provider": provider.name, "model": provider.model,
+           "settings": {"reasoning_effort": getattr(provider, "reasoning_effort", None), "temperature": 0},
            "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "runs": {}}
+    RESULTS.mkdir(exist_ok=True)
+    if hasattr(provider, "served_models") and provider.name != "mock":
+        provider.served_models.clear()
     for run in runs:
         controls = Controls.baseline() if run == "baseline" else Controls.with_control(case["control"])
         results = []
         for i, d in enumerate(descriptions):
             r = one_attempt(case, provider, controls, d, prompts[i % len(prompts)])
             results.append(r)
+            with open(RESULTS / f"{case['id']}.partial.jsonl", "a", encoding="utf-8") as fh:  # survives an interrupted run
+                fh.write(json.dumps({"run": run, "i": i, **r}, ensure_ascii=False) + "\n")
             mark = "ERR" if r["error"] else ("HIT" if r["success"] else "ok ")
             print(f"[{case['id']} {run:8}] {i + 1:2}/{len(descriptions)} {mark}  {d[:70]}", flush=True)
+            if r["error"]:
+                print(f"    error: {r['error'][:200]}", flush=True)
         valid = [r for r in results if r["error"] is None]
         hits = sum(1 for r in valid if r["success"])
         out["runs"][run] = {
@@ -96,6 +104,7 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str]) -> dic
             "asr": round(hits / len(valid), 3) if valid else None,
             "results": results,
         }
+    out["served_models"] = sorted(getattr(provider, "served_models", []))
     return out
 
 
@@ -107,7 +116,8 @@ def write_results(out: dict) -> Path:
     (folder / "results.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = [f"# {out['case']} · {out['title']}", "",
-             f"Model: `{out['model']}` ({out['provider']}) · {out['timestamp']}", ""]
+             f"Model: `{out['model']}` ({out['provider']}) · {out['timestamp']}",
+             f"Model names reported by the API: {', '.join(f'`{m}`' for m in out.get('served_models', [])) or 'none'}", ""]
     lines += ["| Run | Attempts | Valid | Hits | ASR |", "|---|---|---|---|---|"]
     for run, r in out["runs"].items():
         lines.append(f"| {run} | {r['attempts']} | {r['valid']} | {r['hits']} | {r['asr']} |")
