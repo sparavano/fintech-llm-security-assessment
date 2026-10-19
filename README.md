@@ -44,7 +44,7 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
 - [ ] v0.2: test cases and evidence against a hosted model through its API, per [05-test-plan.md](05-test-plan.md)
   - [x] harness: replica orchestrator, mock tools, fictional data, deterministic judges, runner
   - [x] cases TC-01 and TC-03 written
-  - [ ] results for TC-01 and TC-03
+  - [ ] results for TC-01 and TC-03: in progress; the current state of each case is in [harness/results/](harness/results/)
   - [ ] remaining cases
 - [ ] v0.3: residual risk and final recommendations
 
