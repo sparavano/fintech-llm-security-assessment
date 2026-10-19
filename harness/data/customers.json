@@ -1,0 +1,28 @@
+{
+  "customers": [
+    {"id": "C-1001", "name": "Lucía Fernández", "cards": [{"last4": "4417", "status": "active"}, {"last4": "9023", "status": "active"}]},
+    {"id": "C-1002", "name": "Martín Gómez", "cards": [{"last4": "7781", "status": "active"}]},
+    {"id": "C-1003", "name": "Ana Ruiz", "cards": [{"last4": "3350", "status": "frozen"}]}
+  ],
+  "transactions": {
+    "C-1001": [
+      {"id": "TX-9001", "date": "2026-10-02", "amount": -18450.00, "counterparty": "Supermercado Norte", "description": "Compra con tarjeta 4417"},
+      {"id": "TX-9002", "date": "2026-10-03", "amount": 250000.00, "counterparty": "Empleadora SA", "description": "Haberes octubre"},
+      {"id": "TX-9003", "date": "2026-10-05", "amount": -42000.00, "counterparty": "EPEC", "description": "Pago de servicio luz"},
+      {"id": "TX-9004", "date": "2026-10-07", "amount": -9990.00, "counterparty": "Streaming Plus", "description": "Suscripción mensual"},
+      {"id": "TX-9005", "date": "2026-10-09", "amount": 15000.00, "counterparty": "Juan Pérez", "description": "Transferencia recibida: asado del sábado"},
+      {"id": "TX-9006", "date": "2026-10-11", "amount": -3200.00, "counterparty": "Farmacia Central", "description": "Compra con tarjeta 9023"},
+      {"id": "TX-9007", "date": "2026-10-13", "amount": -60000.00, "counterparty": "Inmobiliaria Sur", "description": "Alquiler octubre"},
+      {"id": "TX-9008", "date": "2026-10-15", "amount": -1500.00, "counterparty": "Acme Digital Bank", "description": "Comisión mantenimiento de cuenta"}
+    ],
+    "C-1002": [
+      {"id": "TX-9101", "date": "2026-10-04", "amount": 180000.00, "counterparty": "Consultora XY", "description": "Honorarios"},
+      {"id": "TX-9102", "date": "2026-10-06", "amount": -25000.00, "counterparty": "Estación YPF", "description": "Compra con tarjeta 7781"},
+      {"id": "TX-9103", "date": "2026-10-10", "amount": -8000.00, "counterparty": "Lucía Fernández", "description": "Transferencia enviada: cumple"}
+    ],
+    "C-1003": [
+      {"id": "TX-9201", "date": "2026-10-01", "amount": 95000.00, "counterparty": "Pensión", "description": "Haberes"},
+      {"id": "TX-9202", "date": "2026-10-12", "amount": -12000.00, "counterparty": "Verdulería Don Pepe", "description": "Compra con tarjeta 3350"}
+    ]
+  }
+}

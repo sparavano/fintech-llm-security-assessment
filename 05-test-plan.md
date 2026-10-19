@@ -1,6 +1,8 @@
 # 05 · Test plan
 
-> **Planned for v0.2.** Nothing has been tested yet. This file defines what will be tested, how, and what counts as evidence.
+> **v0.2 in progress.** This file defines what is tested, how, and what counts as evidence. The harness is in [harness/](harness/); results appear under `harness/results/` as they are produced and are summarized in [06-findings.md](06-findings.md).
+>
+> *Change from v0.1:* the plan originally called for an open-weight model hosted locally. v0.2 uses a hosted model reached through its API instead, which matches the system under assessment (a third-party hosted model, component C4) at the cost of reproducibility: a hosted model can change under the same name. The model name, provider and date are recorded with every result for that reason. A local model remains possible through the same harness (any OpenAI-compatible endpoint).
 
 ## Objective
 
@@ -10,9 +12,9 @@ Each test is run twice: against the system as designed (no Bank-side controls) a
 
 ## Environment
 
-- An open-weight model running locally. The exact model and version will be recorded with the results; tests are expected to be re-run when the model changes, which is itself part of the point (T10).
-- A minimal replica of the orchestrator: system prompt, three mock tools (`get_recent_transactions`, `freeze_card`, `open_support_ticket`), a small retrieval index built from a fictional help center, and a fictional dataset of customers, cards and transactions.
-- Open-source LLM testing tools, such as garak for probes and promptfoo for suites and reporting. Tooling choices are recorded with the results.
+- A general-purpose hosted model reached through its API, as in the system under assessment. The model name, provider and date are recorded with every result; tests are expected to be re-run when the model changes, which is itself part of the point (T10). Under a free-tier daily quota a run may be spread over several days; every attempt is timestamped and the report states the date range and the model names the API reported.
+- A minimal replica of the orchestrator ([harness/](harness/)): system prompt, three mock tools (`get_recent_transactions`, `freeze_card`, `open_support_ticket`), a keyword retrieval index built from a fictional help center, and a fictional dataset of customers, cards and transactions. Each Bank-side control under test can be switched on in the replica.
+- A small purpose-built runner rather than a general LLM testing tool, so that each judge is deterministic and specific to the threat: success is a string the attacker chose appearing in the reply, or an event in the orchestrator such as a freeze executed on the model's word. garak and promptfoo may be added later for broader probes; tooling choices are recorded with the results.
 
 ## Metric
 
@@ -40,6 +42,6 @@ For each test: the test ID, model and version, tool and version, number of attem
 
 ## Rules
 
-- Only the local replica is tested. No third-party AI service is attacked.
+- The system under test is the replica. The model provider's service is used as the model, under its terms of use; it is not the target, and the payloads are ordinary text placed in the replica's own tool results and messages.
 - All data is fictional.
 - Test cases and result summaries are published. Payloads tuned against real production systems are not.

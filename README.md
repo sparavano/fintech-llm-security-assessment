@@ -2,7 +2,7 @@
 
 Security and risk assessment of a **fictional** generative AI assistant run by a **fictional** Argentine digital bank. The case walks through the full cycle an AI risk or security team would follow for an LLM-based system: characterize it, model its threats, rate the risks, map them to controls under the frameworks a regulated financial entity in Argentina would be expected to consider, and record findings.
 
-> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. No testing yet; see [Roadmap](#roadmap).
+> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 (testing) in progress: the harness is published, results are added as they are produced; see [Roadmap](#roadmap).
 
 ## Results in brief
 
@@ -33,7 +33,7 @@ Out of scope: the mobile app and the core banking platform beyond their interfac
 | 2. Threat modeling | [02-threat-model.md](02-threat-model.md) | OWASP Top 10 for LLM Applications 2026, MITRE ATLAS, OWASP API Security Top 10 2023 |
 | 3. Risk analysis | [03-risk-register.md](03-risk-register.md) | NIST AI RMF 1.0 |
 | 4. Control mapping | [04-controls.md](04-controls.md) | NIST AI RMF 1.0, NIST AI 600-1, ISO/IEC 42001:2023 Annex A, ISO/IEC 27001:2022 Annex A, BCRA AI supervision guide |
-| 5. Testing (v0.2) | [05-test-plan.md](05-test-plan.md) | Open-source LLM testing tools against a locally hosted open model |
+| 5. Testing (v0.2) | [05-test-plan.md](05-test-plan.md), [harness/](harness/) | A replica of the orchestrator with mock tools, run against a hosted model through its API |
 | 6. Findings | [06-findings.md](06-findings.md) | |
 
 How to read it: 01 describes the system and lists, on purpose, the design decisions that create the risk. 02 analyzes each threat; T01, T02 and T07 are written in full as reference cases and the rest in condensed form. 03 scores them and explains every score. 04 says what to do about them and where each control sits in the frameworks. 06 turns the review into findings with an order of work.
@@ -41,7 +41,11 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
 ## Roadmap
 
 - [x] v0.1: system characterization, threat model, risk register, control mapping and design-review findings
-- [ ] v0.2: test cases and evidence against a locally hosted open model, per [05-test-plan.md](05-test-plan.md)
+- [ ] v0.2: test cases and evidence against a hosted model through its API, per [05-test-plan.md](05-test-plan.md)
+  - [x] harness: replica orchestrator, mock tools, fictional data, deterministic judges, runner
+  - [x] cases TC-01 and TC-03 written
+  - [ ] results for TC-01 and TC-03: in progress; the current state of each case is in [harness/results/](harness/results/)
+  - [ ] remaining cases
 - [ ] v0.3: residual risk and final recommendations
 
 How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
@@ -50,7 +54,7 @@ How the references were checked: the OWASP LLM Top 10 2026 categories against th
 
 - The bank, its assistant and every detail about them are fictional. Any resemblance to a real institution or product is coincidental.
 - No text from ISO/IEC standards is reproduced. They are referenced by clause or control number only.
-- Tests run only against open models hosted locally. No third-party AI service is attacked.
+- Tests run against a replica of the system. The model provider's service is used as the model under its terms of use; it is not the target.
 - This is a methodological case study. It is not an audit opinion and it is not legal advice. The legal readings in it are the author's, for the purposes of the case.
 
 ## References
