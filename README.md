@@ -2,7 +2,7 @@
 
 Security and risk assessment of a **fictional** generative AI assistant run by a **fictional** Argentine digital bank. The case walks through the full cycle an AI risk or security team would follow for an LLM-based system: characterize it, model its threats, rate the risks, map them to controls under the frameworks a regulated financial entity in Argentina would be expected to consider, and record findings.
 
-> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 (testing) in progress: the harness is published, results are added as they are produced; see [Roadmap](#roadmap).
+> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 (testing) in progress: the harness is published, results are added as they are produced and summarized in [06-findings.md](06-findings.md#test-evidence-so-far-v02-interim); see [Roadmap](#roadmap).
 
 ## Results in brief
 
@@ -13,6 +13,7 @@ Security and risk assessment of a **fictional** generative AI assistant run by a
 | Highest risks | T01, instructions hidden in a transfer description, and T02, a card frozen on the model's judgment alone (16 each); T07, financial-secrecy data processed by a provider abroad under unverified terms (15) ([03-risk-register.md](03-risk-register.md)) |
 | Controls | 17, mapped to NIST AI RMF 1.0, NIST AI 600-1, ISO/IEC 42001, ISO/IEC 27001 and the BCRA AI guide ([04-controls.md](04-controls.md)) |
 | Findings | 12 from design review, 9 High and 3 Medium, with a suggested order of work ([06-findings.md](06-findings.md)) |
+| Tests so far (v0.2, interim) | Against a hosted model (Gemini, October 2026): no injected instruction obeyed so far in either case tested; the model dropped the injections silently and once relayed attacker text to the customer; the provider answered the same model name with a different model depending on a request parameter. The findings stand ([06-findings.md](06-findings.md#test-evidence-so-far-v02-interim), [harness/results/](harness/results/)) |
 | Main conclusion | Four design changes remove most of the risk at little cost to usefulness: send less to the model, take decisions out of the model, treat output as untrusted, and put the provider arrangement in order |
 
 ## Why this case
