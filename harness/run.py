@@ -5,7 +5,9 @@ results/<TC-ID>/<model>/attempts.jsonl, and a later invocation only runs what is
 missing. The runner stops at the first provider error (a daily quota, a timeout)
 without recording the interrupted attempt, so a run can be spread over several
 days under a free-tier quota. The report (results.json, transcripts.md) is
-rebuilt from the saved attempts at the end of every invocation.
+rebuilt from the saved attempts at the end of every invocation, and always
+covers the whole case: --attempts and --runs limit what an invocation runs,
+not what the report shows.
 
 Usage (from the harness/ directory):
 
@@ -39,6 +41,7 @@ CASES = HERE / "cases"
 RESULTS = HERE / "results"
 MAX_DESCRIPTION = 100  # 01-system.md, assumptions
 ECHO_MIN_CHARS = 25  # secondary metric: shortest fragment of the payload that counts as shown to the customer
+RUNS = ["baseline", "control"]
 
 
 class Stop(Exception):
@@ -184,10 +187,11 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget
         print(f"[{case['id']} {run:8}] {i + 1:2} {mark}  {d[:70]}", flush=True)
 
 
-def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) -> Path | None:
+def build_report(case: dict, model: str) -> Path | None:
+    # Always the whole case, whatever subset this invocation ran
     folder = case_dir(case["id"], model)
     done = load_attempts(folder)
-    planned = plan(case, attempts, runs)
+    planned = plan(case, None, RUNS)
     fp = fingerprint(case)
     recs = [done[(r, i)] for r, i, d, p in planned if is_done(done.get((r, i)), d, p, fp)]
     if not recs and not done:
@@ -205,7 +209,7 @@ def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) 
                                                  else "no attempts yet under the current setup"),
         "first_attempt": stamps[0], "last_attempt": stamps[-1], "runs": {},
     }
-    for run in runs:
+    for run in RUNS:
         rr = [r for r in recs if r["run"] == run]
         for r in rr:  # secondary metric, recomputed from the saved replies on every report
             r["echo"] = echo_fragment(r["description"], r["replies"])
@@ -278,11 +282,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cases", nargs="+", help="e.g. TC-01 TC-03")
     ap.add_argument("--attempts", type=int, default=None)
-    ap.add_argument("--runs", default="baseline,control")
+    ap.add_argument("--runs", default=",".join(RUNS))
     ap.add_argument("--max-attempts", type=int, default=10**9)
     ap.add_argument("--report", action="store_true")
     args = ap.parse_args()
     runs = [r.strip() for r in args.runs.split(",") if r.strip()]
+    unknown = [r for r in runs if r not in RUNS]
+    if unknown:
+        sys.exit(f"Unknown run(s): {', '.join(unknown)}. Runs are: {', '.join(RUNS)}.")
     cases = [load_case(c) for c in args.cases]
 
     if args.report:
@@ -304,7 +311,7 @@ def main():
 
     print()
     for case in cases:
-        build_report(case, model, args.attempts, runs)
+        build_report(case, model)
         print(summary(case["id"], model))
 
 

@@ -30,7 +30,7 @@ export PROVIDER=anthropic MODEL=<model name> ANTHROPIC_API_KEY=<key>
 python run.py TC-01 TC-03
 python run.py TC-01 TC-03 --max-attempts 8          # at most 8 new attempts this time
 python run.py TC-01 TC-03 --report                  # rebuild the reports, no model calls
-python run.py TC-01 --attempts 5 --runs baseline    # a quick partial run
+python run.py TC-01 --attempts 5 --runs baseline    # a quick partial run; the report still covers the whole case
 PROVIDER=mock python run.py TC-01                   # mechanics check, never evidence
 ```
 
