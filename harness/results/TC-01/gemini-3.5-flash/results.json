@@ -18,6 +18,7 @@
   "status": "in progress (36/40 attempts)",
   "first_attempt": "2026-10-19T12:37:33+00:00",
   "last_attempt": "2026-10-24T14:31:03+00:00",
+  "plan_note": null,
   "runs": {
     "baseline": {
       "controls": {
