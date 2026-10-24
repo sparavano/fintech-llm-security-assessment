@@ -5,7 +5,9 @@ results/<TC-ID>/<model>/attempts.jsonl, and a later invocation only runs what is
 missing. The runner stops at the first provider error (a daily quota, a timeout)
 without recording the interrupted attempt, so a run can be spread over several
 days under a free-tier quota. The report (results.json, transcripts.md) is
-rebuilt from the saved attempts at the end of every invocation.
+rebuilt from the saved attempts at the end of every invocation, and always
+covers the whole case: --attempts and --runs limit what an invocation runs,
+not what the report shows.
 
 Usage (from the harness/ directory):
 
@@ -39,6 +41,7 @@ CASES = HERE / "cases"
 RESULTS = HERE / "results"
 MAX_DESCRIPTION = 100  # 01-system.md, assumptions
 ECHO_MIN_CHARS = 25  # secondary metric: shortest fragment of the payload that counts as shown to the customer
+RUNS = ["baseline", "control"]
 
 
 class Stop(Exception):
@@ -58,6 +61,17 @@ def slug(text: str) -> str:
 
 def case_dir(case_id: str, model: str) -> Path:
     return RESULTS / case_id / slug(model)
+
+
+def runs_for(case: dict, model: str) -> tuple[list[str], str | None]:
+    """Runs planned for this case against this model, and the reason for any left out. A
+    results/<case>/<model>/plan.json file can leave a run out for one model, with a note,
+    for instance a control that cannot act against that model."""
+    path = case_dir(case["id"], model) / "plan.json"
+    if not path.exists():
+        return RUNS, None
+    spec = json.loads(path.read_text(encoding="utf-8"))
+    return [r for r in RUNS if r in spec.get("runs", RUNS)], spec.get("note")
 
 
 def fingerprint(case: dict) -> str:
@@ -162,9 +176,14 @@ def one_attempt(case: dict, provider, run: str, description: str, user_prompt: s
 def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget: list[int]) -> None:
     folder = case_dir(case["id"], provider.model)
     folder.mkdir(parents=True, exist_ok=True)
+    planned_runs, _ = runs_for(case, provider.model)
+    skipped = [r for r in runs if r not in planned_runs]
+    if skipped:
+        print(f"{case['id']}: {', '.join(skipped)} run not planned against {provider.model}; see plan.json", flush=True)
+    runs = [r for r in runs if r in planned_runs]
     done = load_attempts(folder)
     fp = fingerprint(case)
-    todo = [p for p in plan(case, attempts, runs) if not is_done(done.get((p[0], p[1])), p[2], p[3], fp)]
+    todo =[p for p in plan(case, attempts, runs) if not is_done(done.get((p[0], p[1])), p[2], p[3], fp)]
     total = len(plan(case, attempts, runs))
     print(f"{case['id']}: {total - len(todo)}/{total} attempts already saved, {len(todo)} to go", flush=True)
     for run, i, d, prompt in todo:
@@ -184,10 +203,12 @@ def run_case(case: dict, provider, attempts: int | None, runs: list[str], budget
         print(f"[{case['id']} {run:8}] {i + 1:2} {mark}  {d[:70]}", flush=True)
 
 
-def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) -> Path | None:
+def build_report(case: dict, model: str) -> Path | None:
+    # Always the whole case, whatever subset this invocation ran
     folder = case_dir(case["id"], model)
     done = load_attempts(folder)
-    planned = plan(case, attempts, runs)
+    runs, note = runs_for(case, model)
+    planned = plan(case, None, runs)
     fp = fingerprint(case)
     recs = [done[(r, i)] for r, i, d, p in planned if is_done(done.get((r, i)), d, p, fp)]
     if not recs and not done:
@@ -203,7 +224,7 @@ def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) 
         "settings": [json.loads(s) for s in settings],
         "status": "complete" if complete else (f"in progress ({len(recs)}/{len(planned)} attempts)" if recs
                                                  else "no attempts yet under the current setup"),
-        "first_attempt": stamps[0], "last_attempt": stamps[-1], "runs": {},
+        "first_attempt": stamps[0], "last_attempt": stamps[-1], "plan_note": note, "runs": {},
     }
     for run in runs:
         rr = [r for r in recs if r["run"] == run]
@@ -226,7 +247,10 @@ def build_report(case: dict, model: str, attempts: int | None, runs: list[str]) 
     (folder / "results.json").write_text(json.dumps(out, ensure_ascii=False, indent=2), encoding="utf-8")
 
     lines = [f"# {out['case']} · {out['title']}", "",
-             f"Status: **{out['status']}**", "",
+             f"Status: **{out['status']}**", ""]
+    if note:
+        lines += [f"> Plan for this model: {note}", ""]
+    lines += [
              f"Model as configured: `{model}` ({out['provider']})  ",
              f"Model names reported by the API: {', '.join(f'`{m}`' for m in served) or 'none'}  ",
              f"Settings: {', '.join(settings)}  ",
@@ -278,11 +302,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cases", nargs="+", help="e.g. TC-01 TC-03")
     ap.add_argument("--attempts", type=int, default=None)
-    ap.add_argument("--runs", default="baseline,control")
+    ap.add_argument("--runs", default=",".join(RUNS))
     ap.add_argument("--max-attempts", type=int, default=10**9)
     ap.add_argument("--report", action="store_true")
     args = ap.parse_args()
     runs = [r.strip() for r in args.runs.split(",") if r.strip()]
+    unknown = [r for r in runs if r not in RUNS]
+    if unknown:
+        sys.exit(f"Unknown run(s): {', '.join(unknown)}. Runs are: {', '.join(RUNS)}.")
     cases = [load_case(c) for c in args.cases]
 
     if args.report:
@@ -304,7 +331,7 @@ def main():
 
     print()
     for case in cases:
-        build_report(case, model, args.attempts, runs)
+        build_report(case, model)
         print(summary(case["id"], model))
 
 
