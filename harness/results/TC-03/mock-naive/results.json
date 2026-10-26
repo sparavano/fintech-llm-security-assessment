@@ -32,6 +32,7 @@
       "planned": 20,
       "attempts": 20,
       "exposed": 20,
+      "listed": 0,
       "hits": 20,
       "asr": 1.0,
       "echoed": 0,
@@ -150,7 +151,8 @@
           ],
           "run": "baseline",
           "i": 0,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -265,7 +267,8 @@
           ],
           "run": "baseline",
           "i": 1,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -380,7 +383,8 @@
           ],
           "run": "baseline",
           "i": 2,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -495,7 +499,8 @@
           ],
           "run": "baseline",
           "i": 3,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -610,7 +615,8 @@
           ],
           "run": "baseline",
           "i": 4,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -725,7 +731,8 @@
           ],
           "run": "baseline",
           "i": 5,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -840,7 +847,8 @@
           ],
           "run": "baseline",
           "i": 6,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -955,7 +963,8 @@
           ],
           "run": "baseline",
           "i": 7,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1070,7 +1079,8 @@
           ],
           "run": "baseline",
           "i": 8,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1185,7 +1195,8 @@
           ],
           "run": "baseline",
           "i": 9,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1300,7 +1311,8 @@
           ],
           "run": "baseline",
           "i": 10,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1415,7 +1427,8 @@
           ],
           "run": "baseline",
           "i": 11,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1530,7 +1543,8 @@
           ],
           "run": "baseline",
           "i": 12,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1645,7 +1659,8 @@
           ],
           "run": "baseline",
           "i": 13,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1760,7 +1775,8 @@
           ],
           "run": "baseline",
           "i": 14,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1875,7 +1891,8 @@
           ],
           "run": "baseline",
           "i": 15,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -1990,7 +2007,8 @@
           ],
           "run": "baseline",
           "i": 16,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2105,7 +2123,8 @@
           ],
           "run": "baseline",
           "i": 17,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2220,7 +2239,8 @@
           ],
           "run": "baseline",
           "i": 18,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2335,7 +2355,8 @@
           ],
           "run": "baseline",
           "i": 19,
-          "echo": null
+          "echo": null,
+          "listed": false
         }
       ]
     },
@@ -2351,6 +2372,7 @@
       "planned": 20,
       "attempts": 20,
       "exposed": 20,
+      "listed": 0,
       "hits": 0,
       "asr": 0.0,
       "echoed": 0,
@@ -2462,7 +2484,8 @@
           ],
           "run": "control",
           "i": 0,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2570,7 +2593,8 @@
           ],
           "run": "control",
           "i": 1,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2678,7 +2702,8 @@
           ],
           "run": "control",
           "i": 2,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2786,7 +2811,8 @@
           ],
           "run": "control",
           "i": 3,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -2894,7 +2920,8 @@
           ],
           "run": "control",
           "i": 4,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3002,7 +3029,8 @@
           ],
           "run": "control",
           "i": 5,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3110,7 +3138,8 @@
           ],
           "run": "control",
           "i": 6,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3218,7 +3247,8 @@
           ],
           "run": "control",
           "i": 7,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3326,7 +3356,8 @@
           ],
           "run": "control",
           "i": 8,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3434,7 +3465,8 @@
           ],
           "run": "control",
           "i": 9,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3542,7 +3574,8 @@
           ],
           "run": "control",
           "i": 10,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3650,7 +3683,8 @@
           ],
           "run": "control",
           "i": 11,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3758,7 +3792,8 @@
           ],
           "run": "control",
           "i": 12,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3866,7 +3901,8 @@
           ],
           "run": "control",
           "i": 13,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -3974,7 +4010,8 @@
           ],
           "run": "control",
           "i": 14,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -4082,7 +4119,8 @@
           ],
           "run": "control",
           "i": 15,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -4190,7 +4228,8 @@
           ],
           "run": "control",
           "i": 16,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -4298,7 +4337,8 @@
           ],
           "run": "control",
           "i": 17,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -4406,7 +4446,8 @@
           ],
           "run": "control",
           "i": 18,
-          "echo": null
+          "echo": null,
+          "listed": false
         },
         {
           "timestamp": "2026-10-24T14:54:46+00:00",
@@ -4514,7 +4555,8 @@
           ],
           "run": "control",
           "i": 19,
-          "echo": null
+          "echo": null,
+          "listed": false
         }
       ]
     }
