@@ -44,7 +44,7 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
 - [x] v0.1: system characterization, threat model, risk register, control mapping and design-review findings
 - [ ] v0.2: test cases and evidence against a hosted model through its API, per [05-test-plan.md](05-test-plan.md)
   - [x] harness: replica orchestrator, mock tools, fictional data, deterministic judges, runner
-  - [x] cases TC-01 and TC-03 written; TC-01b added on 24 October 2026 to test a pattern found in TC-01 ([05-test-plan.md](05-test-plan.md#changes-during-v02))
+  - [x] cases TC-01 and TC-03 written; TC-01b added on 24 October 2026 to test a pattern found in TC-01, and TC-01r on 26 October to test whether the two leaks repeat, each with its reading fixed before the run ([05-test-plan.md](05-test-plan.md#changes-during-v02))
   - [ ] results: TC-01 complete; TC-03 complete (baseline against Gemini, K02 against the scripted model); TC-01b 15 of 20, hypothesis contradicted; the current state of each case is in [harness/results/](harness/results/)
   - [ ] remaining cases
 - [ ] v0.3: residual risk and final recommendations
