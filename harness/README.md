@@ -8,7 +8,7 @@ A minimal replica of the Acme Assistant orchestrator, with mock tools, a fiction
 - `prompts/system.md`: the assistant's rules, with the tool definitions and escalation criteria in the prompt (design decision 4).
 - `data/customers.json`, `data/help_center/`: three fictional customers and six fictional help center articles.
 - `providers.py`: the model behind one interface. Any OpenAI-compatible endpoint (OpenAI, Groq, Gemini's compatibility endpoint, a local Ollama server), Anthropic, or a scripted mock that stands in for a fully compromised model: it checks the mechanics, and that a structural control such as K02 holds whatever the model does.
-- `cases/`: one JSON file per test case, with the injected payloads, the customer prompts and a deterministic judge. No LLM-as-judge: success is a string the attacker chose appearing in the reply, or an orchestrator event such as a freeze executed on the model's word.
+- `cases/`: one JSON file per test case, with the injected payloads, the customer prompts (assigned by position, or paired explicitly with `user_prompt_index`) and a deterministic judge. No LLM-as-judge: success is a string the attacker chose appearing in the reply, or an orchestrator event such as a freeze executed on the model's word.
 - `run.py`: runs a case twice, baseline and with its control. Every completed attempt is appended to `results/<case>/<model>/attempts.jsonl`; `results.json` (every attempt, full messages) and `transcripts.md` (ASR table and representative transcripts) are rebuilt from it after each invocation. Runs are resumable: a later invocation only runs what is missing.
 
 ## Running

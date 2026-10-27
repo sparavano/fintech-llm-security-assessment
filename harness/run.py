@@ -143,7 +143,13 @@ def plan(case: dict, attempts: int | None, runs: list[str]) -> list[tuple[str, i
     if too_long:
         print(f"warning: {len(too_long)} description(s) exceed {MAX_DESCRIPTION} chars", file=sys.stderr)
     prompts = case["user_prompts"]
-    return [(run, i, d, prompts[i % len(prompts)]) for run in runs for i, d in enumerate(descriptions)]
+    # Prompts are assigned by position, cycling through the list, unless the case pairs each
+    # description with a prompt explicitly (user_prompt_index, added on 26 October 2026 for TC-01r)
+    index = case.get("user_prompt_index")
+    if index and len(index) != len(case["descriptions"]):
+        sys.exit(f"{case['id']}: user_prompt_index must have one entry per description")
+    pick = (lambda i: prompts[index[i]]) if index else (lambda i: prompts[i % len(prompts)])
+    return [(run, i, d, pick(i)) for run in runs for i, d in enumerate(descriptions)]
 
 
 def load_attempts(folder: Path) -> dict[tuple[str, int], dict]:
