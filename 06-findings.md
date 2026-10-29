@@ -1,6 +1,6 @@
 # 06 · Findings
 
-> **v0.1, with interim test evidence from v0.2.** Twelve findings from the design review of [01-system.md](01-system.md), ordered by severity. What the tests show so far is in [Test evidence so far](#test-evidence-so-far-v02-interim); residual risk and final recommendations come in v0.3.
+> **v0.1 findings, v0.2 test evidence, v0.3 recommendations.** Twelve findings from the design review of [01-system.md](01-system.md), ordered by inherent severity. What the tests showed is in [Test evidence so far](#test-evidence-so-far-v02-interim); residual risk is scored in [03-risk-register.md](03-risk-register.md#residual-ranking); what the tests change in the recommendations is in [Recommendations after testing](#recommendations-after-testing-v03).
 
 ## Format
 
@@ -65,4 +65,17 @@ The remaining findings are ordinary security and operations work with an AI-shap
 | Short term | F02, F03, F09, F05 | The architectural changes for the two top threats, plus the filtering and grounding that make the rest testable |
 | Medium term | F06, F08, F10, F11, F12 | Supplier change management, data retention, least privilege, content governance and prompt hygiene |
 
-Severities are inherent. They will be revised in v0.3 once the controls are specified and, where possible, tested.
+Severities are inherent; residual scores are in [03-risk-register.md](03-risk-register.md#residual-ranking).
+
+## Recommendations after testing (v0.3)
+
+The four design changes stand. The tests change how two of them must be implemented and add two requirements.
+
+1. **Send less to the model means withholding, not marking (F02, F09).** K01 offered two forms: keep third-party text out of the prompt, or mark it as data. Only the first is a control the Bank owns. With the transfer description marked as untrusted, the model still passed the attacker's message, phone number included, to the customer (TC-01). What usually stopped it was a filter of the model's own, which left the injected description out while showing legitimate ones, failed in 4 of 78 listings with and without the marking, gave a different reply each time the same request was repeated, and never told the customer anything (TC-01b, TC-01r). The recommendation is the first form: the app shows the description, the model never receives it. Where third-party text must reach the model, the Bank checks the reply before showing it for contact details that are not its own (K06): a phone number, an address, a link.
+2. **Take decisions out of the model is confirmed as structural (F03).** The model under test never attempted a freeze, so its good behaviour says nothing about the design. K02 held all 20 freezes a scripted, fully compromised model attempted. Its value is that it does not depend on the model; that is the property to look for in every control on this list.
+3. **Regression tests must sample, not run once (F06, K12).** The same request, sent five times within two minutes at temperature 0, produced five different replies. A test suite that runs each case once cannot tell a safe model from a lucky run. Each adversarial case should run several times, and the result should be read as a rate.
+4. **The Bank must record the configuration of every call (F06, T10).** The provider's responses did not say which model answered, and a request parameter changed which quota, and most likely which model, served the request. The Bank should log, on its side, the model name requested, every parameter sent and the date, so that a change in behaviour can be traced to a change in configuration.
+
+Order of work, revised: F01 stays immediate, as a compliance gap that exists today. F02 joins it, in its withholding form, because the tests showed the alternative does not work and the change is small: the app already shows the description. F03, F04 and F07 follow as the cheap, structural changes. Then F09, F05 and F06 with the two testing requirements above, and the medium-term items as before.
+
+Not tested in v0.2, and therefore resting on design review only: commitments (TC-06), tool scoping (TC-07), retrieval poisoning (TC-08), load (TC-09), accuracy (TC-10) and the handoff (TC-11). Their residual scores carry that caveat.

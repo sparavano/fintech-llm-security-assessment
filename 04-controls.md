@@ -1,6 +1,6 @@
 # 04 · Controls
 
-> **v0.1.** Seventeen controls identified from the design review, with the threats each one treats and a proposed mapping to four frameworks. The mapping is a working proposal: it should be checked against the licensed text of the ISO standards and against NIST AI 100-1 and 600-1 before it is relied on.
+> **v0.1, with one change from the v0.2 tests.** K01 has two forms; the tests showed that only the first, keeping third-party text out of the prompt, can be relied on (see [06-findings.md](06-findings.md#recommendations-after-testing-v03)). Seventeen controls identified from the design review, with the threats each one treats and a proposed mapping to four frameworks. The mapping is a working proposal: it should be checked against the licensed text of the ISO standards and against NIST AI 100-1 and 600-1 before it is relied on.
 
 ## Candidate controls
 

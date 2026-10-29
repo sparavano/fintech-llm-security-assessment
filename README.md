@@ -2,7 +2,7 @@
 
 Security and risk assessment of a **fictional** generative AI assistant run by a **fictional** Argentine digital bank. The case walks through the full cycle an AI risk or security team would follow for an LLM-based system: characterize it, model its threats, rate the risks, map them to controls under the frameworks a regulated financial entity in Argentina would be expected to consider, and record findings.
 
-> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 (testing) in progress: the harness is published, results are added as they are produced and summarized in [06-findings.md](06-findings.md#test-evidence-so-far-v02-interim); see [Roadmap](#roadmap).
+> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 complete for the two top threats: 100 attempts against a hosted model, summarized in [06-findings.md](06-findings.md#test-evidence-so-far-v02-interim). v0.3 complete: residual risk in [03-risk-register.md](03-risk-register.md#residual-ranking) and recommendations after testing in [06-findings.md](06-findings.md#recommendations-after-testing-v03); see [Roadmap](#roadmap).
 
 ## Results in brief
 
@@ -14,7 +14,7 @@ Security and risk assessment of a **fictional** generative AI assistant run by a
 | Controls | 17, mapped to NIST AI RMF 1.0, NIST AI 600-1, ISO/IEC 42001, ISO/IEC 27001 and the BCRA AI guide ([04-controls.md](04-controls.md)) |
 | Findings | 12 from design review, 9 High and 3 Medium, with a suggested order of work ([06-findings.md](06-findings.md)) |
 | Tests so far (v0.2, interim) | Against a hosted model (Gemini, October 2026). The model obeyed none of the orders planted in transfer descriptions, but twice showed the customer the attacker's message, phone number included, as if it were the transfer's description, once with the description marked as untrusted data (K01). A follow-up case, with its hypotheses and reading published before it ran, tested whether that happened because those messages gave the model no order: it did not (0 hits in 20 attempts). What the 100 attempts show instead is a model that leaves injected descriptions out while showing legitimate ones, silently and not always: 4 leaks in the 78 replies that listed the transfer, with the marking and without, and repeating each leaked message five times gave five different replies per run and at most one leak per run: neither leaks reliably; what decides each leak is an unstable behaviour of the model. The freeze control (K02) held every freeze attempted by a scripted model that stands in for a fully compromised one (20 of 20). Provider: its quota errors named a different model from the one requested, and a request parameter changed which quota applied. The findings stand ([06-findings.md](06-findings.md#test-evidence-so-far-v02-interim), [harness/results/](harness/results/)) |
-| Main conclusion | Four design changes remove most of the risk at little cost to usefulness: send less to the model, take decisions out of the model, treat output as untrusted, and put the provider arrangement in order |
+| Main conclusion | Four design changes remove most of the risk at little cost to usefulness: send less to the model, take decisions out of the model, treat output as untrusted, and put the provider arrangement in order. With them no threat stays High ([residual risk, v0.3](03-risk-register.md#residual-ranking)). The tests sharpened the first: send less means keeping third-party text out of the prompt, not marking it as untrusted |
 
 ## Why this case
 
@@ -42,12 +42,12 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
 ## Roadmap
 
 - [x] v0.1: system characterization, threat model, risk register, control mapping and design-review findings
-- [ ] v0.2: test cases and evidence against a hosted model through its API, per [05-test-plan.md](05-test-plan.md)
+- [x] v0.2: test cases and evidence against a hosted model through its API, per [05-test-plan.md](05-test-plan.md), for the two top threats
   - [x] harness: replica orchestrator, mock tools, fictional data, deterministic judges, runner
   - [x] cases TC-01 and TC-03 written; TC-01b added on 24 October 2026 to test a pattern found in TC-01, and TC-01r on 26 October to test whether the two leaks repeat, each with its reading fixed before the run ([05-test-plan.md](05-test-plan.md#changes-during-v02))
-  - [ ] results: TC-01 complete; TC-03 complete (baseline against Gemini, K02 against the scripted model); TC-01b complete, hypothesis contradicted; TC-01r complete, leaks not reproducible; the current state of each case is in [harness/results/](harness/results/)
-  - [ ] remaining cases
-- [ ] v0.3: residual risk and final recommendations
+  - [x] results: TC-01 complete; TC-03 complete (baseline against Gemini, K02 against the scripted model); TC-01b complete, hypothesis contradicted; TC-01r complete, leaks not reproducible; the current state of each case is in [harness/results/](harness/results/)
+  - [ ] remaining cases (TC-02, TC-04 to TC-11), not yet run
+- [x] v0.3: residual risk and final recommendations
 
 How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
 

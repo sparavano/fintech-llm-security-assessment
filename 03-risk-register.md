@@ -1,6 +1,6 @@
 # 03 · Risk register
 
-> **v0.1.** All twelve threats scored on the system as designed. Residual scores follow in v0.3, after the controls in [04-controls.md](04-controls.md) are detailed and, where possible, tested.
+> **v0.3.** All twelve threats scored on the system as designed (v0.1) and, from 29 October 2026, after the controls in [04-controls.md](04-controls.md). Residual scores assume each control is implemented as specified there; where the v0.2 tests bear on a score, the rationale says so. Three residual scores hold only under a condition, listed in [Residual ranking](#residual-ranking).
 
 ## Scoring method
 
@@ -32,18 +32,18 @@
 
 | ID | Threat (short) | L | I | Inherent | Treatment | Controls | L | I | Residual |
 |---|---|---|---|---|---|---|---|---|---|
-| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14, K16 | | | |
-| T02 | Unrequested card freeze | 4 | 4 | 16 High | Mitigate | K01, K02, K07, K12, K15 | | | |
-| T03 | Hidden context extraction | 4 | 2 | 8 Medium | Mitigate | K04, K06, K12 | | | |
-| T04 | Out-of-policy commitments | 4 | 3 | 12 High | Mitigate | K06, K11, K12 | | | |
-| T05 | Cross-customer scoping failure | 2 | 4 | 8 Medium | Mitigate | K03, K12 | | | |
-| T06 | Transcript and handoff over-retention | 3 | 4 | 12 High | Mitigate | K08, K14 | | | |
-| T07 | Cross-border processing by provider | 3 | 5 | 15 High | Mitigate | K09, K13, K16, K17 | | | |
-| T08 | Poisoned help center content | 2 | 4 | 8 Medium | Mitigate | K01, K05, K06, K10 | | | |
-| T09 | Malicious links in rendered replies | 3 | 4 | 12 High | Mitigate | K05 | | | |
-| T10 | Unannounced provider changes | 4 | 3 | 12 High | Mitigate | K09, K12, K17 | | | |
-| T11 | Unbounded consumption | 4 | 3 | 12 High | Mitigate | K07 | | | |
-| T12 | Misinformation taken as the Bank's word | 4 | 3 | 12 High | Mitigate | K11, K12, K13 | | | |
+| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14, K16 | 2 | 3 | 6 Medium |
+| T02 | Unrequested card freeze | 4 | 4 | 16 High | Mitigate | K01, K02, K07, K12, K15 | 2 | 2 | 4 Low |
+| T03 | Hidden context extraction | 4 | 2 | 8 Medium | Mitigate | K04, K06, K12 | 4 | 1 | 4 Low |
+| T04 | Out-of-policy commitments | 4 | 3 | 12 High | Mitigate | K06, K11, K12 | 3 | 3 | 9 Medium |
+| T05 | Cross-customer scoping failure | 2 | 4 | 8 Medium | Mitigate | K03, K12 | 1 | 4 | 4 Low |
+| T06 | Transcript and handoff over-retention | 3 | 4 | 12 High | Mitigate | K08, K14 | 2 | 3 | 6 Medium |
+| T07 | Cross-border processing by provider | 3 | 5 | 15 High | Mitigate | K09, K13, K16, K17 | 2 | 4 | 8 Medium |
+| T08 | Poisoned help center content | 2 | 4 | 8 Medium | Mitigate | K01, K05, K06, K10 | 1 | 3 | 3 Low |
+| T09 | Malicious links in rendered replies | 3 | 4 | 12 High | Mitigate | K05 | 1 | 2 | 2 Low |
+| T10 | Unannounced provider changes | 4 | 3 | 12 High | Mitigate | K09, K12, K17 | 3 | 2 | 6 Medium |
+| T11 | Unbounded consumption | 4 | 3 | 12 High | Mitigate | K07 | 2 | 2 | 4 Low |
+| T12 | Misinformation taken as the Bank's word | 4 | 3 | 12 High | Mitigate | K11, K12, K13 | 3 | 2 | 6 Medium |
 
 Scores are qualitative judgments about a fictional system. Their value lies in the reasoning recorded for each one.
 
@@ -131,3 +131,84 @@ Scored on the worst reasonable scenario, a provider-side incident that exposes t
 
 - **Likelihood 4 (Likely).** Confabulation and stale content are ordinary failure modes, not edge cases, and nothing measures accuracy.
 - **Impact 3 (Moderate).** Harm is per customer and per question, but the same wrong answer repeats until found; the conduct dimension (Ley 24.240, art. 4) keeps it from being minor.
+
+## Residual ranking
+
+| Rank | ID | Threat (short) | Inherent | Residual | Condition the residual depends on | Basis |
+|---|---|---|---|---|---|---|
+| 1 | T04 | Out-of-policy commitments | 12 High | 9 Medium | | Design judgment |
+| 2 | T07 | Cross-border processing by provider | 15 High | 8 Medium | K09 in force: until the contract and the transfer basis exist, the inherent score stands and F01 is a present gap | Design judgment |
+| 3 | T01 | Injection via transfer description | 16 High | 6 Medium | K01 in its first form, descriptions kept out of the prompt; with marking only, the residual stays at the inherent level | v0.2 tests (TC-01, TC-01b, TC-01r) |
+| 3 | T06 | Transcript and handoff over-retention | 12 High | 6 Medium | | Design judgment |
+| 3 | T10 | Unannounced provider changes | 12 High | 6 Medium | K12 samples each test several times and records the configuration of every call | v0.2 observations (F06) |
+| 3 | T12 | Misinformation taken as the Bank's word | 12 High | 6 Medium | | Design judgment |
+| 7 | T02 | Unrequested card freeze | 16 High | 4 Low | | v0.2 test of K02 against a scripted model (TC-03) |
+| 7 | T03 | Hidden context extraction | 8 Medium | 4 Low | | Design judgment |
+| 7 | T05 | Cross-customer scoping failure | 8 Medium | 4 Low | | Design judgment; TC-07 not run |
+| 7 | T11 | Unbounded consumption | 12 High | 4 Low | | Design judgment |
+| 11 | T08 | Poisoned help center content | 8 Medium | 3 Low | | Design judgment |
+| 12 | T09 | Malicious links in rendered replies | 12 High | 2 Low | | Design judgment |
+
+With the controls in place no threat stays High, and the two that led the inherent ranking fall furthest. Both falls rest on controls that take the decision away from the model rather than asking the model to behave: K02 executes the freeze only on the app's confirmation, and K01 in its first form keeps the attacker's text out of the prompt. The v0.2 tests are the reason for the condition on T01: marking the description as untrusted, the second form of K01, did not stop the model from passing the attacker's message to the customer (06-findings), so a Bank that implements only the marking keeps T01 at 16. What remains at the top is what no switch removes: commitments and misinformation, which need grounding and measurement that never reach zero, and the provider arrangement, whose residual depends on a contract.
+
+## Residual rationale
+
+### T01
+
+- **Likelihood 2 (Unlikely).** With transfer descriptions shown by the app and not passed to the model (K01, first form) and the remaining third-party fields reduced to what the model needs (K16), the attacker's main channel into the prompt is closed. Counterparty names still reach the model; they are short and can be truncated, which is why the score is not 1. The v0.2 tests show why the first form is required: across 100 attempts, with the description marked as untrusted or not, the model passed the attacker's message, phone number included, to the customer four times, and repeating the same request gave a different reply each time (TC-01r). That behaviour is the model's, undocumented and unstable, and the Bank cannot rely on it.
+- **Impact 3 (Moderate).** With K05 there is no link or image, with K02 the freeze needs the customer's confirmation in the app, and with K14 an injected request in a handoff is visible as model-generated. What is left is a short text in a counterparty name reaching an individual customer.
+
+### T02
+
+- **Likelihood 2 (Unlikely).** With K02 the orchestrator executes a freeze only when the app's native dialog, which names the card, is confirmed. Against a scripted model that attempts every freeze an injection asks for, the baseline froze the card in 20 of 20 attempts and the control in none (TC-03). The remaining path is a customer talked into confirming the dialog, which takes social engineering outside the model; it is not 1 because T01's residual can supply that pretext.
+- **Impact 2 (Minor).** The action now has the customer's own confirmation, K15 notifies them through a separate channel with the way to undo it, and K07 limits repetition.
+
+### T03
+
+- **Likelihood 4 (Likely).** Extraction stays as easy as before; nothing here prevents it, and K06 only detects attempts.
+- **Impact 1 (Minimal).** With K04 the prompt holds nothing harmful if disclosed and the escalation criteria live in code.
+
+### T04
+
+- **Likelihood 3 (Possible).** Grounding with citations and refusal when no passage applies (K11) and Bank-side detection of commitments (K06) make it harder; a persistent customer can still find phrasings that get through, and K12 measures how often.
+- **Impact 3 (Moderate).** Unchanged: the Bank still owns what the assistant says, and each case is a dispute. Not tested in v0.2 (TC-06).
+
+### T05
+
+- **Likelihood 1 (Rare).** With per-customer delegated tokens and ownership checked by the core APIs (K03), a flaw in the orchestrator no longer reaches other customers on its own.
+- **Impact 4 (Major).** Unchanged if it happens. Not tested in v0.2 (TC-07); the score rests on the design of K03.
+
+### T06
+
+- **Likelihood 2 (Unlikely).** Redacted transcripts, shorter retention and access by role (K08) reduce what an insider or a breach can reach.
+- **Impact 3 (Moderate).** Less data, kept for less time, readable by fewer people; still personal data under financial secrecy for the retention window.
+
+### T07
+
+- **Likelihood 2 (Unlikely).** A contract that binds the provider to zero or shortest retention, no training and confidentiality (K09), with notice of legal demands and audit rights, makes an exposure event less likely; it remains an event outside the Bank's control.
+- **Impact 4 (Major).** Pseudonymized and minimized data (K16) lowers what an exposure reveals, but transactions are still financial data of identifiable customers. The score assumes K09 is in force; until it is, the compliance gap of F01 exists regardless of probability.
+
+### T08
+
+- **Likelihood 1 (Rare).** Review before indexing and separating the right to publish from the right to feed the model (K10) turn a single compromised account into an insufficient condition.
+- **Impact 3 (Moderate).** With K05 the active variant has no link or image to carry; misinformation in one article still reaches many customers until found.
+
+### T09
+
+- **Likelihood 1 (Rare).** With plain-text rendering or a link allowlist and no images from model output (K05), there is no rendered element left to abuse.
+- **Impact 2 (Minor).** A link to an allowed Bank domain in the wrong context; phishing by text, such as a phone number, is T01's residual, not this one.
+
+### T10
+
+- **Likelihood 3 (Possible).** Pinning and notice (K09) cannot stop the provider from changing what serves a name: in v0.2 the provider's quota errors named a different model from the one requested, and a request parameter changed which quota applied (F06). Changes will keep happening.
+- **Impact 2 (Minor).** With the evaluation suite run on a schedule and on every change (K12) and an exit path (K17), a lost safety property is caught before it reaches many customers. This requires two things the v0.2 tests showed are needed: each test is run several times, because the same request gave different replies, and the configuration of every call is recorded on the Bank's side, because the response does not say which model answered.
+
+### T11
+
+- **Likelihood 2 (Unlikely).** Rate limits, token budgets and alerts (K07) make sustained abuse visible and bounded.
+- **Impact 2 (Minor).** Cost is capped and a single account cannot exhaust the service.
+
+### T12
+
+- **Likelihood 3 (Possible).** Grounding with citations (K11) and sampled accuracy measurement (K12) reduce wrong answers; confabulation does not go to zero.
+- **Impact 2 (Minor).** Customers are told what the assistant can decide and have a path to a human (K13), errors are found by measurement instead of by complaints, and citations let customers check. Not tested in v0.2 (TC-10).
