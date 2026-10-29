@@ -1,6 +1,6 @@
 # 06 · Findings
 
-> **v0.1 findings, v0.2 test evidence, v0.3 recommendations (draft).** Twelve findings from the design review of [01-system.md](01-system.md), ordered by inherent severity. What the tests showed is in [Test evidence so far](#test-evidence-so-far-v02-interim); residual risk is scored in [03-risk-register.md](03-risk-register.md#residual-ranking); what the tests change in the recommendations is in [Recommendations after testing](#recommendations-after-testing-v03-draft).
+> **v0.1 findings, v0.2 test evidence, v0.3 recommendations.** Twelve findings from the design review of [01-system.md](01-system.md), ordered by inherent severity. What the tests showed is in [Test evidence so far](#test-evidence-so-far-v02-interim); residual risk is scored in [03-risk-register.md](03-risk-register.md#residual-ranking); what the tests change in the recommendations is in [Recommendations after testing](#recommendations-after-testing-v03).
 
 ## Format
 
@@ -67,7 +67,7 @@ The remaining findings are ordinary security and operations work with an AI-shap
 
 Severities are inherent; residual scores are in [03-risk-register.md](03-risk-register.md#residual-ranking).
 
-## Recommendations after testing (v0.3, draft)
+## Recommendations after testing (v0.3)
 
 The four design changes stand. The tests change how two of them must be implemented and add two requirements.
 

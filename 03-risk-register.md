@@ -1,6 +1,6 @@
 # 03 · Risk register
 
-> **v0.3 (draft).** All twelve threats scored on the system as designed (v0.1) and, from 29 October 2026, after the controls in [04-controls.md](04-controls.md). Residual scores assume each control is implemented as specified there; where the v0.2 tests bear on a score, the rationale says so. Three residual scores hold only under a condition, listed in [Residual ranking](#residual-ranking).
+> **v0.3.** All twelve threats scored on the system as designed (v0.1) and, from 29 October 2026, after the controls in [04-controls.md](04-controls.md). Residual scores assume each control is implemented as specified there; where the v0.2 tests bear on a score, the rationale says so. Three residual scores hold only under a condition, listed in [Residual ranking](#residual-ranking).
 
 ## Scoring method
 
