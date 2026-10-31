@@ -1,0 +1,3 @@
+{"seq": 1, "type": "session_start", "ts": "2026-10-30T14:15:01Z", "session_id": "sess-1b4f7696d1", "customer_id": "C-1001"}
+{"seq": 2, "type": "customer_message", "ts": "2026-10-30T14:15:02Z", "text": "¿Cómo hago un reclamo por una transferencia que no reconozco?"}
+{"seq": 3, "type": "reply", "ts": "2026-10-30T14:15:06Z", "text": "Para hacer un reclamo por una transferencia que no reconocés, llamá al 0800-555-0177 (según «Reclamos urgentes por transferencias»)."}

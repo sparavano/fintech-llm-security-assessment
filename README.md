@@ -2,7 +2,7 @@
 
 Security and risk assessment of a **fictional** generative AI assistant run by a **fictional** Argentine digital bank. The case walks through the full cycle an AI risk or security team would follow for an LLM-based system: characterize it, model its threats, rate the risks, map them to controls under the frameworks a regulated financial entity in Argentina would be expected to consider, and record findings.
 
-> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 complete for the two top threats: 100 attempts against a hosted model, summarized in [06-findings.md](06-findings.md#test-evidence-so-far-v02-interim). v0.3 complete: residual risk in [03-risk-register.md](03-risk-register.md#residual-ranking) and recommendations after testing in [06-findings.md](06-findings.md#recommendations-after-testing-v03); see [Roadmap](#roadmap).
+> **Status:** v0.1 complete, based on a review of the system's design: twelve threats analyzed and rated, seventeen controls mapped, twelve findings. v0.2 complete for the two top threats: 100 attempts against a hosted model, summarized in [06-findings.md](06-findings.md#test-evidence-so-far-v02-interim). v0.3 complete: residual risk in [03-risk-register.md](03-risk-register.md#residual-ranking) and recommendations after testing in [06-findings.md](06-findings.md#recommendations-after-testing-v03). v0.4, forensic readiness: whether the Bank could investigate an incident from its own records ([07-forensic-readiness.md](07-forensic-readiness.md)); see [Roadmap](#roadmap).
 
 ## Results in brief
 
@@ -14,6 +14,7 @@ Security and risk assessment of a **fictional** generative AI assistant run by a
 | Controls | 17, mapped to NIST AI RMF 1.0, NIST AI 600-1, ISO/IEC 42001, ISO/IEC 27001 and the BCRA AI guide ([04-controls.md](04-controls.md)) |
 | Findings | 12 from design review, 9 High and 3 Medium, with a suggested order of work ([06-findings.md](06-findings.md)) |
 | Tests so far (v0.2, interim) | Against a hosted model (Gemini, October 2026). The model obeyed none of the orders planted in transfer descriptions, but twice showed the customer the attacker's message, phone number included, as if it were the transfer's description, once with the description marked as untrusted data (K01). A follow-up case, with its hypotheses and reading published before it ran, tested whether that happened because those messages gave the model no order: it did not (0 hits in 20 attempts). What the 100 attempts show instead is a model that leaves injected descriptions out while showing legitimate ones, silently and not always: 4 leaks in the 78 replies that listed the transfer, with the marking and without, and repeating each leaked message five times gave five different replies per run and at most one leak per run: neither leaks reliably; what decides each leak is an unstable behaviour of the model. The freeze control (K02) held every freeze attempted by a scripted model that stands in for a fully compromised one (20 of 20). Provider: its quota errors named a different model from the one requested, and a request parameter changed which quota applied. The findings stand ([06-findings.md](06-findings.md#test-evidence-so-far-v02-interim), [harness/results/](harness/results/)) |
+| Forensic readiness (v0.4) | Eight scripted incidents, each record kept four ways and investigated by fixed rules published with predictions before the run. The record as designed (C8) cannot tell a poisoned help center article from a model error: in both cases the investigator blames the model. Redacting in one plausible reading of K08 leaves 2 strong attributions in 8; a full forensic record gets 8 of 8. Keeping hashes and references to the systems of record instead of the third-party text the model received gets 7 of 8 at 61% of the size; that text is still kept when the model repeats it in a reply. Proposed: control K18, and K08 amended to redact by reference ([07-forensic-readiness.md](07-forensic-readiness.md#reading)) |
 | Main conclusion | Four design changes remove most of the risk at little cost to usefulness: send less to the model, take decisions out of the model, treat output as untrusted, and put the provider arrangement in order. With them no threat stays High ([residual risk, v0.3](03-risk-register.md#residual-ranking)). The tests sharpened the first: send less means keeping third-party text out of the prompt, not marking it as untrusted |
 
 ## Why this case
@@ -36,6 +37,7 @@ Out of scope: the mobile app and the core banking platform beyond their interfac
 | 4. Control mapping | [04-controls.md](04-controls.md) | NIST AI RMF 1.0, NIST AI 600-1, ISO/IEC 42001:2023 Annex A, ISO/IEC 27001:2022 Annex A, BCRA AI supervision guide |
 | 5. Testing (v0.2) | [05-test-plan.md](05-test-plan.md), [harness/](harness/) | A replica of the orchestrator with mock tools, run against a hosted model through its API; deterministic judges, resumable runs and a fingerprint of the setup on every attempt |
 | 6. Findings | [06-findings.md](06-findings.md) | |
+| 7. Forensic readiness (v0.4) | [07-forensic-readiness.md](07-forensic-readiness.md), [harness/forensics/](harness/forensics/) | ISO/IEC 27037, ISO/IEC 27001 Annex A 8.15 and 8.17, ISO/IEC 42001 Annex A A.6.2.8 |
 
 How to read it: 01 describes the system and lists, on purpose, the design decisions that create the risk. 02 analyzes each threat; T01, T02 and T07 are written in full as reference cases and the rest in condensed form. 03 scores them and explains every score. 04 says what to do about them and where each control sits in the frameworks. 06 turns the review into findings with an order of work.
 
@@ -48,6 +50,10 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
   - [x] results: TC-01 complete; TC-03 complete (baseline against Gemini, K02 against the scripted model); TC-01b complete, hypothesis contradicted; TC-01r complete, leaks not reproducible; the current state of each case is in [harness/results/](harness/results/)
   - [ ] remaining cases (TC-02, TC-04 to TC-11), not yet run
 - [x] v0.3: residual risk and final recommendations
+- [ ] v0.4: forensic readiness
+  - [x] FX-01: protocol and predictions committed before the code and the run; eight scripted incidents, four record levels, integrity tests; results and reading ([07-forensic-readiness.md](07-forensic-readiness.md))
+  - [ ] K18 and the K08 amendment carried into the risk register, controls and findings
+  - [ ] blind run by a human investigator; multi-session incidents; versioned help center
 
 How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
 
@@ -69,6 +75,7 @@ Frameworks and standards
 - NIST, *Artificial Intelligence Risk Management Framework: Generative Artificial Intelligence Profile*, NIST AI 600-1. <https://doi.org/10.6028/NIST.AI.600-1>
 - ISO/IEC 42001:2023, *Information technology — Artificial intelligence — Management system*.
 - ISO/IEC 27001:2022, *Information security, cybersecurity and privacy protection — Information security management systems — Requirements*.
+- ISO/IEC 27037:2012, *Information technology — Security techniques — Guidelines for identification, collection, acquisition and preservation of digital evidence*.
 
 Argentine regulation
 
