@@ -1,6 +1,6 @@
 # 07 · Forensic readiness (FX-01)
 
-> **v0.4 in progress.** This file fixes the protocol, the analyst's rules and the predictions of experiment FX-01 **before it is run**. The git history shows the order: this file was committed before the code that runs the experiment and before any result. Results and their reading are added below the predictions, in a later commit, without editing what is above them.
+> **v0.4 in progress.** This file fixes the protocol, the analyst's rules and the predictions of experiment FX-01 **before it is run**. The git history shows the order: this file was committed before the code that runs the experiment and before any result. Results and their reading are added below the predictions, in a later commit, without editing what is above them. One factual error above them was corrected after an independent review; see [Corrections after review](#corrections-after-review).
 
 ## Question
 
@@ -12,7 +12,7 @@ Tests v0.1 to v0.3 asked whether an attack works. FX-01 asks a different questio
 
 - [01-system.md](01-system.md) keeps full transcripts for twelve months "for quality review and customer disputes" (C8). A dispute is an investigation, so C8 is already meant to serve as evidence. Nothing in the design says what it must contain for that.
 - The treatment proposed for T06 ([02-threat-model.md](02-threat-model.md#t06--transcripts-and-handoff-summaries-spread-personal-data-further-than-needed), K08) is to redact tool results and personal data in transcripts. Tool results are exactly where T01's payload sits. Minimization and investigation pull in opposite directions, and the assessment has not yet said how to reconcile them.
-- A hosted model does not repeat itself. In TC-01r the same input was sent 20 times with the same settings and temperature 0, and the model gave 20 different replies ([results](harness/results/TC-01r/gemini-3.5-flash/transcripts.md)). Running an incident again cannot show what the assistant said the first time. Only the record can.
+- A hosted model does not repeat itself. In TC-01r four inputs were each sent five times with the same settings and temperature 0, and the model gave twenty different replies, five per input ([results](harness/results/TC-01r/gemini-3.5-flash/transcripts.md)). Running an incident again cannot show what the assistant said the first time. Only the record can.
 
 ## Design
 
@@ -165,7 +165,7 @@ All 32 attributions, their strength and whether the event could be found in the 
 
 ### Integrity: as predicted
 
-The hash chain alone detects a changed or deleted record (T1, T2) and misses the removal of the last records and a rewrite that recomputes every hash (T3, T4). With the anchor, all four are detected. L0 and L1 carry nothing to check against and detect none.
+The hash chain alone detects a changed or deleted record (T1, T2) and misses the removal of the last records and a rewrite that recomputes every hash (T3, T4). With the anchor, all four are detected. L0 and L1 carry nothing to check against and detect none. Two of these results hold by construction rather than by measurement: a record without hashes cannot detect anything, and the anchor is taken from the untampered record, which is the assumption the protocol states (the anchor is trustworthy).
 
 ### Size and data at rest
 
@@ -176,6 +176,8 @@ The hash chain alone detects a changed or deleted record (T1, T2) and misses the
 | L2 Forensic, full | 11,750 | 27,386 |
 | L3 By reference | 7,157 | 189 |
 
+The measure counts whole texts only. It misses fragments: at L0 the S5 reply still holds 50 characters of the attacker's message with only the number masked. It is a lower bound at every level.
+
 ### Re-running is not evidence
 
 From the existing TC-01r data: four inputs sent five times each to the hosted model, each time with the same payload, customer prompt, settings (temperature 0) and setup fingerprint. Twenty repetitions, twenty different replies.
@@ -184,17 +186,18 @@ From the existing TC-01r data: four inputs sent five times each to the hosted mo
 
 Thirteen, none in the attributions or the integrity tests:
 
-- **Q4 at L0, all eight incidents.** Predicted *no*; the result is *partly*. Masking removes numbers, not the rest of the customer's text, so part of the model's input survives. The prediction underrated L0.
+- **Q4 at L0, seven incidents.** Predicted *no*; the result is *partly*: the record holds the customer's text, which is part of the model's input. In S7, where the customer's text is masked, the result is *no*, as predicted. The protocol did not define *partly* and *no* precisely; the rule that separates them was written into the code after the first run, following the review below, and is: *no* when the record holds no part of the model's input intact.
 - **Q1 at L0, S5 to S8.** Predicted *yes*; the result is *only the session's times*. The prediction contradicted the protocol's own prediction that these events cannot be found in an L0 record: if the reply that carried the number cannot be found, neither can its time. Error in the predictions.
+- **Q4 at L3, S6.** Predicted *yes, by hash and references*; the result is *no*. The model's input is rebuilt from the references and checked against its hash; in S6 the deleted article cannot be recovered, so the input cannot be rebuilt. The prediction overlooked that Q4 at L3 depends on the same systems of record as the attribution. This check was added after the review below; before it, the code answered *yes* from the presence of the hash alone.
 - **Third-party text at rest at L3.** Predicted none; the result is 189 characters, all from S5: the model repeated the attacker's text in its reply, and the reply is kept (as the model's output and as the reply before and after rendering, 3 × 63 characters). L3 keeps third-party text out of the record of what the model *received*; it cannot keep it out of what the model *said*, as long as replies are kept for disputes.
 
 ## Reading
 
 **1. The record as designed cannot tell an attack through the help center from a model error.** This is the main claim of the protocol, and it holds. C8 keeps the conversation and the tool results, not the passages the model received. When the article has been removed, the investigator re-runs retrieval against today's index, finds nothing, and concludes that the model made the number up. The Bank would then change its model or prompt and leave the attacker's channel open. The same record gives S8 the same answer, so even its correct answers there are weak: they would have been the same whatever had happened.
 
-**2. K08 as worded destroys evidence.** Redacting tool results and masking personal data (L0) leaves 2 strong attributions in 8. The masking that protects the customer hides the event itself in the four number incidents (the reply can no longer be shown to contain the number), and in S7 it hides that the customer typed the number herself, so the Bank cannot clear itself. L0 still gets four weak right answers, but only because the investigator reconstructs from core banking, whose ledger does not change. The same reconstruction against the help center, which does change, gives the wrong answer in S6.
+**2. K08 as worded destroys evidence.** Redacting tool results and masking personal data (L0) leaves 2 strong attributions in 8. The masking that protects the customer hides the event itself in the four number incidents (the reply can no longer be shown to contain the number), and in S7 it hides that the customer typed the number herself, so the Bank cannot clear itself. L0 still gets four weak right answers, all by reconstruction: S1 and S5 from the core banking ledger, which does not change, and S3 and S8 by elimination, which also relies on re-running the help center search against today's index. The same re-run gives the wrong answer in S6, where the index had changed.
 
-**3. Keeping references instead of text reconciles both.** L3 keeps no third-party text from the model's input, is 61% the size of L2, and gets 7 of 8 strong. Its one weak case is S6, the only one whose system of record keeps no history: a help center article that was deleted. A record by reference is only as strong as the systems it points to. If the help center kept every version it ever served (which K10 already asks to govern as code), S6 would be strong too.
+**3. Keeping references instead of text reconciles both.** L3 keeps no third-party text from the model's input, is 61% the size of L2, and gets 7 of 8 strong. In seven of eight incidents the model's exact input could be rebuilt from the references and matched to its hash. Its one weak case is S6, the only one whose system of record keeps no history: a help center article that was deleted, so neither the attribution nor the rebuild can be completed. A record by reference is only as strong as the systems it points to. K10 governs help center content but does not ask for its versions to be kept; if they were, S6 would be strong too.
 
 **4. A chain without an anchor is not enough, and nothing replaces the record.** The chain catches edits in the middle, not a truncated or rewritten log; the anchor has to live outside the control of whoever can write the log. Without either, in a dispute such as S2 or S4 the Bank's record is its own unprotected word. Re-running the incident is no substitute: the model does not repeat itself.
 
@@ -207,6 +210,18 @@ Thirteen, none in the attributions or the integrity tests:
 **K08, amended.** Where K08 says to redact tool results and personal data in transcripts, redact by reference, not by deletion: replace third-party text with its hash and a pointer to its system of record, so the record still proves what the model received. Masking personal data in replies and customer messages should keep a keyed hash of each masked value, so that an investigator holding the value from the customer's report can check whether it was there without the record storing it in clear. (Not tested in FX-01; it would turn S7 at L0 from undetermined into a check.)
 
 Neither change is reflected yet in [03-risk-register.md](03-risk-register.md), [04-controls.md](04-controls.md) or [06-findings.md](06-findings.md).
+
+## Corrections after review
+
+On 31 October 2026, after the first run, an independent review of the code against this protocol (by a separate agent that had not written it) found the following. Each was fixed, the experiment was run again, and the results above are from the second run. No prediction was changed. No attribution changed between the two runs.
+
+- *Bug, analyst.* A freeze was attributed to the customer whenever she had asked for it, confirmed or not; the protocol requires a request followed by an affirmative answer. Fixed. S2 was right before and after.
+- *Bug, analyst.* When a reconstruction found nothing (an empty window, no passages), the channel was labeled *recorded*, which could have turned a weak elimination into a strong one. Fixed; not triggered in these eight incidents.
+- *Q3* ignored the tool definitions, which the protocol lists. Fixed.
+- *Q4* was answered *partly* by a fixed rule and, at L3, *yes* from the presence of a hash alone. It is now computed from the record; at L3 the input is rebuilt from the references and checked against the hash (see the deviations above).
+- *S6 exception.* An unrecoverable passage counted as evidence that it had been served without checking the record. The record must now be intact (chain and anchor) for it to count.
+- *Smaller:* the 30-day reconstruction had no upper date bound; with K01 marking on, hashes of wrapped descriptions would not have matched. Both fixed; neither applies to these incidents.
+- *Text:* the TC-01r sentence in "Why it matters" said one input was sent twenty times; it was four inputs sent five times each. Corrected above. Reading 2 overstated how L0's right answers were reached, and reading 3 overstated what K10 covers; both corrected. The size and data-at-rest measure undercounts fragments; now stated.
 
 ## Next steps
 

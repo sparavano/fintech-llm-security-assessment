@@ -10,7 +10,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Callable
 
-from orchestrator import Controls, HelpCenter, MockBank
+from orchestrator import TOOLS, Controls, HelpCenter, MockBank
 
 from .capture import Clock, sha256, Recorder, RecordingBank, RecordingHelpCenter, RecordingOrchestrator
 
@@ -87,6 +87,8 @@ class SourcesOfRecord:
     """What the investigator can query, as it stands at investigation time."""
     transactions: dict[str, list[dict]]   # core banking ledger
     articles: dict[str, str]              # current help center index
+    system_prompts: dict[str, str] = field(default_factory=dict)  # versions kept, by SHA-256
+    tools: list[dict] = field(default_factory=list)               # current tool definitions
 
     def customer_transactions(self, customer_id: str) -> list[dict]:
         return list(self.transactions.get(customer_id, []))
@@ -231,4 +233,6 @@ def run(incident: Incident) -> tuple[list[dict], SourcesOfRecord]:
     articles = dict(HelpCenter().articles)
     if incident.article and not incident.article_removed_after:
         articles.update(incident.article)
-    return rec.events, SourcesOfRecord(transactions=json.loads(json.dumps(ledger)), articles=articles)
+    prompt = orc.system_prompt
+    return rec.events, SourcesOfRecord(transactions=json.loads(json.dumps(ledger)), articles=articles,
+                                       system_prompts={sha256(prompt): prompt}, tools=json.loads(json.dumps(TOOLS)))

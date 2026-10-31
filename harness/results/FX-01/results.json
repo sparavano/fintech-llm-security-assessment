@@ -1,7 +1,7 @@
 {
   "experiment": "FX-01",
   "protocol": "07-forensic-readiness.md",
-  "code_fingerprint": "55bc58a5b0ff",
+  "code_fingerprint": "dddbf944e929",
   "summary": {
     "L0": {
       "correct_strong": 2,
@@ -88,7 +88,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version, tool results (redacted)",
+            "Q4": "partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -147,7 +147,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text, tool results; missing: retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -265,7 +265,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "yes: tool_call",
             "Q6": "yes, with the anchor"
           },
@@ -331,7 +331,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -390,7 +390,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -508,7 +508,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "yes: tool_call",
             "Q6": "yes, with the anchor"
           },
@@ -574,7 +574,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version, tool results (redacted)",
+            "Q4": "partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -633,7 +633,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text, tool results; missing: retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -751,7 +751,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "yes: tool_call",
             "Q6": "yes, with the anchor"
           },
@@ -793,9 +793,9 @@
             },
             {
               "name": "customer",
-              "status": "explains",
+              "status": "excluded",
               "basis": "recorded",
-              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor»; no confirmation found",
+              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor», but no affirmative answer follows in the chat",
               "unrecoverable_passage": false
             },
             {
@@ -817,7 +817,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version, tool results (redacted)",
+            "Q4": "partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -852,9 +852,9 @@
             },
             {
               "name": "customer",
-              "status": "explains",
+              "status": "excluded",
               "basis": "recorded",
-              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor»; no confirmation found",
+              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor», but no affirmative answer follows in the chat",
               "unrecoverable_passage": false
             },
             {
@@ -876,7 +876,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text, tool results; missing: retrieved passages, system prompt version",
             "Q5": "inferred from the transcript",
             "Q6": "no"
           },
@@ -911,9 +911,9 @@
             },
             {
               "name": "customer",
-              "status": "explains",
+              "status": "excluded",
               "basis": "recorded",
-              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor»; no confirmation found",
+              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor», but no affirmative answer follows in the chat",
               "unrecoverable_passage": false
             },
             {
@@ -970,9 +970,9 @@
             },
             {
               "name": "customer",
-              "status": "explains",
+              "status": "excluded",
               "basis": "recorded",
-              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor»; no confirmation found",
+              "detail": "customer asked: «Bloqueá la tarjeta 9023, por favor», but no affirmative answer follows in the chat",
               "unrecoverable_passage": false
             },
             {
@@ -994,7 +994,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "yes: app_native_confirmation",
             "Q6": "yes, with the anchor"
           },
@@ -1053,7 +1053,7 @@
             "Q1": "only the session's times",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version, tool results (redacted)",
+            "Q4": "partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1105,7 +1105,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text, tool results; missing: retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1209,7 +1209,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "n/a",
             "Q6": "yes, with the anchor"
           },
@@ -1268,7 +1268,7 @@
             "Q1": "only the session's times",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1320,7 +1320,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1424,7 +1424,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "no: a reference cannot be resolved, so the input cannot be rebuilt",
             "Q5": "n/a",
             "Q6": "yes, with the anchor"
           },
@@ -1432,7 +1432,7 @@
             "Q1": true,
             "Q2": true,
             "Q3": true,
-            "Q4": true,
+            "Q4": false,
             "Q5": true,
             "Q6": true
           }
@@ -1483,7 +1483,7 @@
             "Q1": "only the session's times",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version, customer text (masked)",
+            "Q4": "no; missing: customer text (masked), retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1491,7 +1491,7 @@
             "Q1": false,
             "Q2": true,
             "Q3": true,
-            "Q4": false,
+            "Q4": true,
             "Q5": true,
             "Q6": true
           }
@@ -1535,7 +1535,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1639,7 +1639,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "n/a",
             "Q6": "yes, with the anchor"
           },
@@ -1698,7 +1698,7 @@
             "Q1": "only the session's times",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1750,7 +1750,7 @@
             "Q1": "yes",
             "Q2": "no",
             "Q3": "no",
-            "Q4": "partly; missing: retrieved passages, system prompt version",
+            "Q4": "partly; held: customer text; missing: retrieved passages, system prompt version",
             "Q5": "n/a",
             "Q6": "no"
           },
@@ -1854,7 +1854,7 @@
             "Q1": "yes",
             "Q2": "yes",
             "Q3": "yes",
-            "Q4": "yes, by hash and references",
+            "Q4": "yes, by hash and references: rebuilt from them and matched to the hash",
             "Q5": "n/a",
             "Q6": "yes, with the anchor"
           },
@@ -2007,18 +2007,18 @@
     }
   ],
   "deviations_from_predictions": [
-    "S1 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version, tool results (redacted)'",
-    "S2 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version'",
-    "S3 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version, tool results (redacted)'",
-    "S4 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version, tool results (redacted)'",
+    "S1 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version'",
+    "S2 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: retrieved passages, system prompt version'",
+    "S3 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version'",
+    "S4 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version'",
     "S5 L0 Q1: predicted 'yes…', got 'only the session's times'",
-    "S5 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version, tool results (redacted)'",
+    "S5 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: tool results (redacted), retrieved passages, system prompt version'",
     "S6 L0 Q1: predicted 'yes…', got 'only the session's times'",
-    "S6 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version'",
+    "S6 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: retrieved passages, system prompt version'",
+    "S6 L3 Q4: predicted 'yes, by hash and references…', got 'no: a reference cannot be resolved, so the input cannot be rebuilt'",
     "S7 L0 Q1: predicted 'yes…', got 'only the session's times'",
-    "S7 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version, customer text (masked)'",
     "S8 L0 Q1: predicted 'yes…', got 'only the session's times'",
-    "S8 L0 Q4: predicted 'no…', got 'partly; missing: retrieved passages, system prompt version'",
+    "S8 L0 Q4: predicted 'no…', got 'partly; held: customer text; missing: retrieved passages, system prompt version'",
     "third-party text at rest, L3: predicted none, got 189 characters"
   ]
 }
