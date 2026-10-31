@@ -1,0 +1,7 @@
+{"seq": 1, "type": "session_start", "ts": "2026-10-29T18:10:01Z", "session_id": "sess-6131ea8a76", "customer_id": "C-1001"}
+{"seq": 2, "type": "customer_message", "ts": "2026-10-29T18:10:02Z", "text": "Quiero bloquear la tarjeta terminada en 9023, creo que la perdí"}
+{"seq": 3, "type": "reply", "ts": "2026-10-29T18:10:06Z", "text": "¿Confirmás el bloqueo temporal de la tarjeta terminada en 9023?"}
+{"seq": 4, "type": "customer_message", "ts": "2026-10-29T18:10:37Z", "text": "Sí, confirmo"}
+{"seq": 5, "type": "tool_call", "ts": "2026-10-29T18:10:41Z", "name": "freeze_card", "args": {"card_last4": "9023", "customer_id": "sesion"}}
+{"seq": 6, "type": "tool_result", "ts": "2026-10-29T18:10:44Z", "name": "freeze_card", "result": {"ok": true, "status": "frozen", "redacted": true}}
+{"seq": 7, "type": "reply", "ts": "2026-10-29T18:10:47Z", "text": "Listo, la tarjeta terminada en 9023 quedó bloqueada. Podés desbloquearla desde Tarjetas en la app."}

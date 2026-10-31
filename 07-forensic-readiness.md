@@ -145,3 +145,71 @@ L3 keeps no third-party free text at rest; L1 and L2 keep it. L2 is the largest 
 - The analyst stands in for a competent investigator with full access to the Bank's systems. A real investigator could do worse (no access to core banking) or better (other sources, such as app logs or the customer's own device).
 - The anchor is assumed trustworthy. Securing it is a separate problem.
 - Phone masking at L0 is one plausible reading of K08's "redact personal data"; another redaction rule would give other results on S5 to S8.
+
+---
+
+## Results (run on 31 October 2026)
+
+Full report, with every record and the analyst's reasoning channel by channel: [harness/results/FX-01/report.md](harness/results/FX-01/report.md). The run is deterministic: running `python run_fx.py` again gives the same files.
+
+### Attribution: every cell as predicted
+
+| | L0 Minimized | L1 As designed | L2 Forensic, full | L3 By reference |
+|---|---|---|---|---|
+| Correct and strong | 2 of 8 | 5 of 8 | 8 of 8 | 7 of 8 |
+| Correct but weak | 4 | 2 | 0 | 1 |
+| Wrong | 1 (S6) | 1 (S6) | 0 | 0 |
+| Undetermined | 1 (S7) | 0 | 0 | 0 |
+
+All 32 attributions, their strength and whether the event could be found in the record match the predictions. At L1, the record as designed, S6 (a poisoned help center article, deleted the next day) and S8 (a number the model invented) lead to the same answer, *model, unprompted, by elimination*: the analyst blames the model and misses the attacker in S6.
+
+### Integrity: as predicted
+
+The hash chain alone detects a changed or deleted record (T1, T2) and misses the removal of the last records and a rewrite that recomputes every hash (T3, T4). With the anchor, all four are detected. L0 and L1 carry nothing to check against and detect none.
+
+### Size and data at rest
+
+| Level | Mean bytes per incident | Third-party text stored verbatim (characters, 8 incidents) |
+|---|---|---|
+| L0 Minimized | 794 | 0 |
+| L1 As designed | 1,250 | 772 |
+| L2 Forensic, full | 11,750 | 27,386 |
+| L3 By reference | 7,157 | 189 |
+
+### Re-running is not evidence
+
+From the existing TC-01r data: four inputs sent five times each to the hosted model, each time with the same payload, customer prompt, settings (temperature 0) and setup fingerprint. Twenty repetitions, twenty different replies.
+
+### Deviations from the predictions
+
+Thirteen, none in the attributions or the integrity tests:
+
+- **Q4 at L0, all eight incidents.** Predicted *no*; the result is *partly*. Masking removes numbers, not the rest of the customer's text, so part of the model's input survives. The prediction underrated L0.
+- **Q1 at L0, S5 to S8.** Predicted *yes*; the result is *only the session's times*. The prediction contradicted the protocol's own prediction that these events cannot be found in an L0 record: if the reply that carried the number cannot be found, neither can its time. Error in the predictions.
+- **Third-party text at rest at L3.** Predicted none; the result is 189 characters, all from S5: the model repeated the attacker's text in its reply, and the reply is kept (as the model's output and as the reply before and after rendering, 3 × 63 characters). L3 keeps third-party text out of the record of what the model *received*; it cannot keep it out of what the model *said*, as long as replies are kept for disputes.
+
+## Reading
+
+**1. The record as designed cannot tell an attack through the help center from a model error.** This is the main claim of the protocol, and it holds. C8 keeps the conversation and the tool results, not the passages the model received. When the article has been removed, the investigator re-runs retrieval against today's index, finds nothing, and concludes that the model made the number up. The Bank would then change its model or prompt and leave the attacker's channel open. The same record gives S8 the same answer, so even its correct answers there are weak: they would have been the same whatever had happened.
+
+**2. K08 as worded destroys evidence.** Redacting tool results and masking personal data (L0) leaves 2 strong attributions in 8. The masking that protects the customer hides the event itself in the four number incidents (the reply can no longer be shown to contain the number), and in S7 it hides that the customer typed the number herself, so the Bank cannot clear itself. L0 still gets four weak right answers, but only because the investigator reconstructs from core banking, whose ledger does not change. The same reconstruction against the help center, which does change, gives the wrong answer in S6.
+
+**3. Keeping references instead of text reconciles both.** L3 keeps no third-party text from the model's input, is 61% the size of L2, and gets 7 of 8 strong. Its one weak case is S6, the only one whose system of record keeps no history: a help center article that was deleted. A record by reference is only as strong as the systems it points to. If the help center kept every version it ever served (which K10 already asks to govern as code), S6 would be strong too.
+
+**4. A chain without an anchor is not enough, and nothing replaces the record.** The chain catches edits in the middle, not a truncated or rewritten log; the anchor has to live outside the control of whoever can write the log. Without either, in a dispute such as S2 or S4 the Bank's record is its own unprotected word. Re-running the incident is no substitute: the model does not repeat itself.
+
+**5. Only L2 and L3 say which model and configuration produced the incident** (Q2, Q3). That links FX-01 to T10: v0.2 found the provider's quota errors naming a different model from the one requested ([harness/README.md](harness/README.md#reading-the-results)). If the Bank cannot say which model answered, it cannot tell a provider change from an attack either.
+
+## Proposed control K18 and an amendment to K08
+
+**K18 · Keep a forensic-grade, minimized record of every session.** For every call to the model: the hash of its exact input, with references to systems of record that keep versions (transactions, help center articles, system prompt and tool definitions); the model requested and the names the provider reports back; settings and controls in force. Every tool call and every core API call, with the customer it ran for and the channel that triggered it (a model's tool call or the app's native confirmation). Every reply before and after rendering. Hash-chain the record and write the head of the chain, at least once per session, to a store outside the control of whoever writes the log (a write-once store or a time-stamping service). Keep help center, system prompt and tool definition versions for as long as the records that point to them. Threats: T01, T02, T05, T06, T08, T10. References: ISO/IEC 27001:2022 Annex A 8.15 (logging) and 8.17 (clock synchronization); ISO/IEC 42001:2023 Annex A A.6.2.8 (recording of event logs, already cited for K06, K08 and K12); ISO/IEC 27037:2012 (identification, collection, acquisition and preservation of digital evidence), as a reference for the record's later handling.
+
+**K08, amended.** Where K08 says to redact tool results and personal data in transcripts, redact by reference, not by deletion: replace third-party text with its hash and a pointer to its system of record, so the record still proves what the model received. Masking personal data in replies and customer messages should keep a keyed hash of each masked value, so that an investigator holding the value from the customer's report can check whether it was there without the record storing it in clear. (Not tested in FX-01; it would turn S7 at L0 from undetermined into a check.)
+
+Neither change is reflected yet in [03-risk-register.md](03-risk-register.md), [04-controls.md](04-controls.md) or [06-findings.md](06-findings.md).
+
+## Next steps
+
+- A human run of the blind exercise (`python run_fx.py --blind L1`), to compare a person's attributions with the analyst's on the same records.
+- Incidents spread over several sessions and days, and a provider change between them (T10).
+- Versioned help center in the replica, to check that S6 at L3 becomes strong, as reading 3 predicts.

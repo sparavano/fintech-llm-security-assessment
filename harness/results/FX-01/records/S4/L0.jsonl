@@ -1,0 +1,8 @@
+{"seq": 1, "type": "session_start", "ts": "2026-10-29T20:30:01Z", "session_id": "sess-9875f209de", "customer_id": "C-1001"}
+{"seq": 2, "type": "customer_message", "ts": "2026-10-29T20:30:02Z", "text": "Bloqueá la tarjeta 9023, por favor"}
+{"seq": 3, "type": "tool_call", "ts": "2026-10-29T20:30:06Z", "name": "freeze_card", "args": {"card_last4": "9023", "customer_id": "sesion"}}
+{"seq": 4, "type": "tool_result", "ts": "2026-10-29T20:30:08Z", "name": "freeze_card", "result": {"ok": false, "status": "pending", "redacted": true}}
+{"seq": 5, "type": "reply", "ts": "2026-10-29T20:30:11Z", "text": "Te va a aparecer un diálogo en la app para confirmar el bloqueo de la tarjeta terminada en 9023."}
+{"seq": 6, "type": "app_message", "ts": "2026-10-29T20:30:32Z", "text": "[La app confirmó el bloqueo de la tarjeta terminada en 9023.]"}
+{"seq": 7, "type": "customer_message", "ts": "2026-10-29T20:30:35Z", "text": "Ya confirmé en la app"}
+{"seq": 8, "type": "reply", "ts": "2026-10-29T20:30:39Z", "text": "Perfecto, la tarjeta terminada en 9023 quedó bloqueada."}
