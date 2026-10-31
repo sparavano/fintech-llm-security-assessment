@@ -48,7 +48,8 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
   - [x] harness: replica orchestrator, mock tools, fictional data, deterministic judges, runner
   - [x] cases TC-01 and TC-03 written; TC-01b added on 24 October 2026 to test a pattern found in TC-01, and TC-01r on 26 October to test whether the two leaks repeat, each with its reading fixed before the run ([05-test-plan.md](05-test-plan.md#changes-during-v02))
   - [x] results: TC-01 complete; TC-03 complete (baseline against Gemini, K02 against the scripted model); TC-01b complete, hypothesis contradicted; TC-01r complete, leaks not reproducible; the current state of each case is in [harness/results/](harness/results/)
-  - [ ] remaining cases (TC-02, TC-04 to TC-11), not yet run
+  - [ ] TC-08 (poisoned help center article) specified on 31 October 2026, with hypotheses and reading fixed before the run ([05-test-plan.md](05-test-plan.md#changes-during-v04)); not yet run
+  - [ ] remaining cases (TC-02, TC-04 to TC-07, TC-09 to TC-11), not yet run
 - [x] v0.3: residual risk and final recommendations
 - [ ] v0.4: forensic readiness
   - [x] FX-01: protocol and predictions committed before the code and the run; eight scripted incidents, four record levels, integrity tests; results and reading ([07-forensic-readiness.md](07-forensic-readiness.md))
