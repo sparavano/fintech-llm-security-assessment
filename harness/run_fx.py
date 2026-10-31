@@ -297,7 +297,7 @@ def blind(level: str, all_records: dict) -> None:
         (folder / f"X{n}.report.txt").write_text(inc.report + "\n", encoding="utf-8")
         key[f"X{n}"] = {"incident": sid, "truth": CAUSES[inc.truth]}
     sealed = json.dumps(key, ensure_ascii=False, indent=2)
-    (folder / "key.sealed.json").write_text(sealed, encoding="utf-8")
+    (folder / "key.sealed.json").write_bytes(sealed.encode("utf-8"))  # bytes: the same hash on Windows
     print(f"\nBlind exercise written to {folder}. Commitment (SHA-256 of key.sealed.json): {sha256(sealed)}")
     print("Write your attribution for each X before opening the key.")
 

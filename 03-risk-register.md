@@ -1,6 +1,6 @@
 # 03 · Risk register
 
-> **v0.3.** All twelve threats scored on the system as designed (v0.1) and, from 29 October 2026, after the controls in [04-controls.md](04-controls.md). Residual scores assume each control is implemented as specified there; where the v0.2 tests bear on a score, the rationale says so. Three residual scores hold only under a condition, listed in [Residual ranking](#residual-ranking).
+> **v0.3.** All twelve threats scored on the system as designed (v0.1) and, from 29 October 2026, after the controls in [04-controls.md](04-controls.md). Residual scores assume each control is implemented as specified there; where the v0.2 tests bear on a score, the rationale says so. Three residual scores hold only under a condition, listed in [Residual ranking](#residual-ranking). From 31 October 2026 (v0.4), K18 is listed against the threats it supports and K08 redacts by reference; no score changes, because K18 acts on detecting and investigating an incident, which this scoring does not measure ([07-forensic-readiness.md](07-forensic-readiness.md)).
 
 ## Scoring method
 
@@ -32,16 +32,16 @@
 
 | ID | Threat (short) | L | I | Inherent | Treatment | Controls | L | I | Residual |
 |---|---|---|---|---|---|---|---|---|---|
-| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14, K16 | 2 | 3 | 6 Medium |
-| T02 | Unrequested card freeze | 4 | 4 | 16 High | Mitigate | K01, K02, K07, K12, K15 | 2 | 2 | 4 Low |
+| T01 | Injection via transfer description | 4 | 4 | 16 High | Mitigate | K01, K02, K05, K06, K12, K14, K16, K18 | 2 | 3 | 6 Medium |
+| T02 | Unrequested card freeze | 4 | 4 | 16 High | Mitigate | K01, K02, K07, K12, K15, K18 | 2 | 2 | 4 Low |
 | T03 | Hidden context extraction | 4 | 2 | 8 Medium | Mitigate | K04, K06, K12 | 4 | 1 | 4 Low |
 | T04 | Out-of-policy commitments | 4 | 3 | 12 High | Mitigate | K06, K11, K12 | 3 | 3 | 9 Medium |
-| T05 | Cross-customer scoping failure | 2 | 4 | 8 Medium | Mitigate | K03, K12 | 1 | 4 | 4 Low |
-| T06 | Transcript and handoff over-retention | 3 | 4 | 12 High | Mitigate | K08, K14 | 2 | 3 | 6 Medium |
+| T05 | Cross-customer scoping failure | 2 | 4 | 8 Medium | Mitigate | K03, K12, K18 | 1 | 4 | 4 Low |
+| T06 | Transcript and handoff over-retention | 3 | 4 | 12 High | Mitigate | K08, K14, K18 | 2 | 3 | 6 Medium |
 | T07 | Cross-border processing by provider | 3 | 5 | 15 High | Mitigate | K09, K13, K16, K17 | 2 | 4 | 8 Medium |
-| T08 | Poisoned help center content | 2 | 4 | 8 Medium | Mitigate | K01, K05, K06, K10 | 1 | 3 | 3 Low |
+| T08 | Poisoned help center content | 2 | 4 | 8 Medium | Mitigate | K01, K05, K06, K10, K18 | 1 | 3 | 3 Low |
 | T09 | Malicious links in rendered replies | 3 | 4 | 12 High | Mitigate | K05 | 1 | 2 | 2 Low |
-| T10 | Unannounced provider changes | 4 | 3 | 12 High | Mitigate | K09, K12, K17 | 3 | 2 | 6 Medium |
+| T10 | Unannounced provider changes | 4 | 3 | 12 High | Mitigate | K09, K12, K17, K18 | 3 | 2 | 6 Medium |
 | T11 | Unbounded consumption | 4 | 3 | 12 High | Mitigate | K07 | 2 | 2 | 4 Low |
 | T12 | Misinformation taken as the Bank's word | 4 | 3 | 12 High | Mitigate | K11, K12, K13 | 3 | 2 | 6 Medium |
 
@@ -180,7 +180,7 @@ With the controls in place no threat stays High, and the two that led the inhere
 
 ### T06
 
-- **Likelihood 2 (Unlikely).** Redacted transcripts, shorter retention and access by role (K08) reduce what an insider or a breach can reach.
+- **Likelihood 2 (Unlikely).** Redacted transcripts, shorter retention and access by role (K08) reduce what an insider or a breach can reach. From v0.4, K08 redacts by reference: third-party text is replaced by its hash and a pointer to its system of record, so the record holds less without losing what an investigation needs. Redacting by deletion, as K08 was first worded, left 2 correct and well-founded attributions in 8 scripted incidents; by reference, 7 in 8 (FX-01).
 - **Impact 3 (Moderate).** Less data, kept for less time, readable by fewer people; still personal data under financial secrecy for the retention window.
 
 ### T07
@@ -191,7 +191,7 @@ With the controls in place no threat stays High, and the two that led the inhere
 ### T08
 
 - **Likelihood 1 (Rare).** Review before indexing and separating the right to publish from the right to feed the model (K10) turn a single compromised account into an insufficient condition.
-- **Impact 3 (Moderate).** With K05 the active variant has no link or image to carry; misinformation in one article still reaches many customers until found.
+- **Impact 3 (Moderate).** With K05 the active variant has no link or image to carry; misinformation in one article still reaches many customers until found. Finding it depends on the record: with the record as designed, an article that is served and then removed cannot be told apart from a model error, and the investigation blames the model (FX-01). K18, with help center versions kept, closes that gap; it does not change the score, but the score assumes an attack would be recognized as one.
 
 ### T09
 
