@@ -209,7 +209,7 @@ Thirteen, none in the attributions or the integrity tests:
 
 **K08, amended.** Where K08 says to redact tool results and personal data in transcripts, redact by reference, not by deletion: replace third-party text with its hash and a pointer to its system of record, so the record still proves what the model received. Masking personal data in replies and customer messages should keep a keyed hash of each masked value, so that an investigator holding the value from the customer's report can check whether it was there without the record storing it in clear. (Not tested in FX-01; it would turn S7 at L0 from undetermined into a check.)
 
-Neither change is reflected yet in [03-risk-register.md](03-risk-register.md), [04-controls.md](04-controls.md) or [06-findings.md](06-findings.md).
+Both changes were carried into [04-controls.md](04-controls.md), [03-risk-register.md](03-risk-register.md) and [06-findings.md](06-findings.md) (finding F13) on 31 October 2026. No risk score changed: K18 acts on detection and investigation, which the scoring does not measure.
 
 ## Corrections after review
 

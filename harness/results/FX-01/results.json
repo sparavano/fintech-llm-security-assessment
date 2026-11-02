@@ -1,7 +1,7 @@
 {
   "experiment": "FX-01",
   "protocol": "07-forensic-readiness.md",
-  "code_fingerprint": "dddbf944e929",
+  "code_fingerprint": "ee7d8ed74df0",
   "summary": {
     "L0": {
       "correct_strong": 2,

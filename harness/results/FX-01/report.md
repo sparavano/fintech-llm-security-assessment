@@ -1,6 +1,6 @@
 # FX-01 · Forensic readiness: results
 
-Protocol and predictions: [07-forensic-readiness.md](../../../07-forensic-readiness.md). Produced by `run_fx.py` (code fingerprint `dddbf944e929`), scripted model, simulated clock: every run gives the same files. Not evidence about any real model.
+Protocol and predictions: [07-forensic-readiness.md](../../../07-forensic-readiness.md). Produced by `run_fx.py` (code fingerprint `ee7d8ed74df0`), scripted model, simulated clock: every run gives the same files. Not evidence about any real model.
 
 ## Attribution
 
