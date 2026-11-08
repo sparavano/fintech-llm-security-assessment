@@ -38,6 +38,7 @@ Out of scope: the mobile app and the core banking platform beyond their interfac
 | 5. Testing (v0.2) | [05-test-plan.md](05-test-plan.md), [harness/](harness/) | A replica of the orchestrator with mock tools, run against a hosted model through its API; deterministic judges, resumable runs and a fingerprint of the setup on every attempt |
 | 6. Findings | [06-findings.md](06-findings.md) | |
 | 7. Forensic readiness (v0.4) | [07-forensic-readiness.md](07-forensic-readiness.md), [harness/forensics/](harness/forensics/) | ISO/IEC 27037, ISO/IEC 27001 Annex A 8.15 and 8.17, ISO/IEC 42001 Annex A A.6.2.8 |
+| 8. Memory poisoning (v0.5) | [08-memory-poisoning.md](08-memory-poisoning.md), [harness/memory/](harness/memory/) | OWASP Top 10 for Agentic Applications for 2026 (ASI06) |
 
 How to read it: 01 describes the system and lists, on purpose, the design decisions that create the risk. 02 analyzes each threat; T01, T02 and T07 are written in full as reference cases and the rest in condensed form. 03 scores them and explains every score. 04 says what to do about them and where each control sits in the frameworks. 06 turns the review into findings with an order of work.
 
@@ -55,8 +56,12 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
   - [x] FX-01: protocol and predictions committed before the code and the run; eight scripted incidents, four record levels, integrity tests; results and reading ([07-forensic-readiness.md](07-forensic-readiness.md))
   - [x] K18 and the K08 amendment carried into the controls, risk register and findings (F13)
   - [ ] blind run by a human investigator; multi-session incidents; versioned help center
+- [ ] v0.5: memory poisoning across sessions ([08-memory-poisoning.md](08-memory-poisoning.md))
+  - [x] TC-12: protocol, hypotheses and reading committed before the code; threat T13 and proposed control K19
+  - [x] harness: long-term memory added from outside the replica, two-session runner, scripted check (K19 held in 20 of 20)
+  - [ ] baseline against the hosted model; results and reading
 
-How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
+How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; ASI06 of the OWASP agentic list against secondary listings, pending a check against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
 
 ## Ground rules
 
@@ -70,6 +75,7 @@ How the references were checked: the OWASP LLM Top 10 2026 categories against th
 Frameworks and standards
 
 - OWASP GenAI Security Project, *OWASP Top 10 for LLM Applications 2026*. <https://genai.owasp.org/home/resources/owasp-genai-llm-top-10-2026/>
+- OWASP GenAI Security Project, *OWASP Top 10 for Agentic Applications for 2026*. <https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/>
 - OWASP, *API Security Top 10 2023*. <https://owasp.org/API-Security/>
 - MITRE ATLAS. <https://atlas.mitre.org/>
 - NIST, *Artificial Intelligence Risk Management Framework (AI RMF 1.0)*, NIST AI 100-1. <https://www.nist.gov/itl/ai-risk-management-framework>
