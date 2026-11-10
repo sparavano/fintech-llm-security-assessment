@@ -61,7 +61,8 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
   - [x] harness: long-term memory added from outside the replica, two-session runner, scripted check (K19 held in 20 of 20)
   - [x] TC-12c: two checks added during the run, a positive control for the write path (C1) and the use path on its own (C2), with their reading fixed before they ran ([08-memory-poisoning.md](08-memory-poisoning.md#checks-added-during-the-run-fixed-before-they-ran))
   - [x] baseline against the hosted model, complete: 0 of 20 notes written; C1 4 of 4 ([results](08-memory-poisoning.md#results-tc-12-baseline-and-c1))
-  - [ ] C2 against the hosted model (1 of 8 so far), then its reading and the forensic reading
+  - [x] C2 against the hosted model: 5 of 8, the poisoned note reached the customer; the forensic reading ([results](08-memory-poisoning.md#results-c2-and-the-forensic-question))
+  - [ ] the same cases against a model from another provider
 
 How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; ASI06 of the OWASP agentic list against secondary listings, pending a check against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
 
