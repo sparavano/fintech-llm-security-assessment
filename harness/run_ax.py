@@ -40,7 +40,7 @@ from orchestrator import Controls, HelpCenter, MockBank
 from run import MAX_DESCRIPTION, Stop, case_dir, load_case
 
 HERE = Path(__file__).parent
-CASES = ["TC-13", "TC-13c"]
+CASES = ["TC-13c", "TC-13"]  # the checks first: if the model does not do the task, the attack attempts test nothing
 RUNS = ["baseline", "control"]
 VARIABLE = ("descriptions", "families", "turn1_prompts", "turn2_prompts", "turn2_levels", "turn1_index", "turn2_index",
             "cneg_turn2_prompts", "cneg_levels", "cpos_turn2_prompts", "title", "expected_safe_behavior", "control_note")
@@ -194,7 +194,9 @@ def run_case(case: dict, provider, budget: list[int]) -> None:
         try:
             rec = one_attempt(case, provider, p)
         except Exception as exc:
-            quota = re.findall(r"quotaId'?\"?:\s*'?\"?([A-Za-z-]+)", str(exc))
+            body = getattr(getattr(exc, "response", None), "text", "") or ""  # the SDK's message can omit the body
+            quota = re.findall(r"quotaId'?\"?:\s*'?\"?([A-Za-z-]+)", str(exc) + body)
+            quota += [f"model named by the provider: {m}" for m in set(re.findall(r'"model":\s*"([^"]+)"', body))]
             detail = f"quota {', '.join(sorted(set(quota)))}" if quota else str(exc)[:300]
             raise Stop(f"provider error, attempt not saved: {type(exc).__name__}: {detail}") from exc
         with open(folder / "attempts.jsonl", "a", encoding="utf-8") as fh:
