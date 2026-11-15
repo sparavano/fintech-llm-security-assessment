@@ -39,6 +39,7 @@ Out of scope: the mobile app and the core banking platform beyond their interfac
 | 6. Findings | [06-findings.md](06-findings.md) | |
 | 7. Forensic readiness (v0.4) | [07-forensic-readiness.md](07-forensic-readiness.md), [harness/forensics/](harness/forensics/) | ISO/IEC 27037, ISO/IEC 27001 Annex A 8.15 and 8.17, ISO/IEC 42001 Annex A A.6.2.8 |
 | 8. Memory poisoning (v0.5) | [08-memory-poisoning.md](08-memory-poisoning.md), [harness/memory/](harness/memory/) | OWASP Top 10 for Agentic Applications for 2026 (ASI06) |
+| 9. Tool-argument hijack (v0.6) | [09-tool-argument-hijack.md](09-tool-argument-hijack.md) | OWASP Top 10 for Agentic Applications for 2026 (ASI01, ASI02) |
 
 How to read it: 01 describes the system and lists, on purpose, the design decisions that create the risk. 02 analyzes each threat; T01, T02 and T07 are written in full as reference cases and the rest in condensed form. 03 scores them and explains every score. 04 says what to do about them and where each control sits in the frameworks. 06 turns the review into findings with an order of work.
 
@@ -63,8 +64,12 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
   - [x] baseline against the hosted model, complete: 0 of 20 notes written; C1 4 of 4 ([results](08-memory-poisoning.md#results-tc-12-baseline-and-c1))
   - [x] C2 against the hosted model: 5 of 8, the poisoned note reached the customer; the forensic reading ([results](08-memory-poisoning.md#results-c2-and-the-forensic-question))
   - [ ] the same cases against a model from another provider
+- [ ] v0.6: tool-argument hijack ([09-tool-argument-hijack.md](09-tool-argument-hijack.md))
+  - [x] TC-13: protocol, hypotheses and reading committed before the code; threat T14 and proposed control K20; the checks on the experiment itself (Cneg, Cpos) are part of the design
+  - [ ] harness: the statement tool added from outside the replica, two-turn runner, scripted check of K20
+  - [ ] baseline, Cneg and Cpos against the hosted model
 
-How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; ASI06 of the OWASP agentic list against secondary listings, pending a check against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
+How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; ASI01, ASI02 and ASI06 of the OWASP agentic list against secondary listings, pending a check against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
 
 ## Ground rules
 
