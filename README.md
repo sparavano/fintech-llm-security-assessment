@@ -66,7 +66,7 @@ How to read it: 01 describes the system and lists, on purpose, the design decisi
   - [ ] the same cases against a model from another provider
 - [ ] v0.6: tool-argument hijack ([09-tool-argument-hijack.md](09-tool-argument-hijack.md))
   - [x] TC-13: protocol, hypotheses and reading committed before the code; threat T14 and proposed control K20; the checks on the experiment itself (Cneg, Cpos) are part of the design
-  - [ ] harness: the statement tool added from outside the replica, two-turn runner, scripted check of K20
+  - [x] harness: the statement tool added from outside the replica, two-turn runner, scripted check (K20 held 20 of 20 and let through every address the customer typed)
   - [ ] baseline, Cneg and Cpos against the hosted model
 
 How the references were checked: the OWASP LLM Top 10 2026 categories against the official document; ASI01, ASI02 and ASI06 of the OWASP agentic list against secondary listings, pending a check against the official document; the MITRE ATLAS identifiers against MITRE's D3FEND listing of ATLAS 2026.07 (AML.T0034 and case study AML.CS0021 against a third-party mirror only); the NIST AI RMF subcategories and the NIST AI 600-1 risk categories against the published documents; the Argentine statutes and the BCRA texts against their official publications; the ISO/IEC 42001 and 27001 Annex A numbering against public control listings, pending a check against the licensed text.
